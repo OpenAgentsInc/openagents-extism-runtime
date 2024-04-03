@@ -1,0 +1,41 @@
+// Global init and destroy
+function init(){
+    
+}
+
+
+function destroy(){
+
+}
+
+///////////////////////////////////////
+
+// With job id
+function runForJob(data){
+    data=JSON.parse(data);
+    const { jobId, args } = data;
+    // ...
+}
+
+function loopForJob(data){
+    data=JSON.parse(data);
+    const { jobId, args } = data;
+    // ...
+}
+
+//////////////////////////
+// OR
+//////////////////////////
+
+// Without job id
+function run(data) {
+    const args = JSON.parse(data);
+    // ...
+}
+
+
+function loop(data) {
+    const args = JSON.parse(data);
+    // ...
+}
+

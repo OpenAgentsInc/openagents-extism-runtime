@@ -1,0 +1,41 @@
+{
+  "name": "openagents-extism-runtime",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/main.js",
+  "scripts": {
+    "build-docs": "bash build-docs.sh",
+    "build-proto": "bash build-proto.sh",
+    "build": "npx tsc -p ./tsconfig.json",
+    "build-all": "npm run build-proto && npm run build && npm run build-docs",
+    "start": "node --experimental-specifier-resolution=node js/main.js",
+    "debug": "npm run build-all && cd build && node --trace-warnings --experimental-specifier-resolution=node js/main.js"
+  },
+  "author": "",
+  "license": "",
+  "type": "module",
+  "dependencies": {
+    "@extism/extism": "^1.0.2",
+    "@grpc/grpc-js": "^1.10.4",
+    "@grpc/proto-loader": "^0.7.11",
+    "@protobuf-ts/grpc-backend": "^2.9.4",
+    "@protobuf-ts/grpc-transport": "^2.9.4",
+    "@protobuf-ts/plugin": "^2.9.4",
+    "@types/google-protobuf": "^3.15.12",
+    "express": "^4.19.2",
+    "google-protobuf": "^3.21.2",
+    "grpc-tools": "^1.12.4",
+    "install": "^0.13.0",
+    "nostr-tools": "^2.3.2",
+    "npm": "^10.5.0",
+    "ts-protoc-gen": "^0.15.0",
+    "uuidv4": "^6.2.13",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.3",
+        "esbuild": "^0.20.2",
+    "@esbuild-plugins/node-modules-polyfill": "^0.2.2"
+
+  }
+}

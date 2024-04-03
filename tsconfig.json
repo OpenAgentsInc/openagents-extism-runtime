@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "outDir": "build/js",
+        "skipLibCheck": true,
+        "target": "ES6",
+        "moduleResolution": "Node",
+        "module": "ES6",
+        "allowSyntheticDefaultImports": true
+    },
+    "include": ["src/**/*.ts", "src/**/*.js", "src/**/*.cjs", "src/**/*.mjs"],
+}
