@@ -62,8 +62,8 @@ export default class ExtismJob {
             useWasi: true,
             runInWorker: true,
             functions: {
-                env:this.hostFunctions
-            }
+                "extism:host/user": this.hostFunctions,
+            },
         };
         const plugin = await Extism.createPlugin(path, options);
         let meta: any;

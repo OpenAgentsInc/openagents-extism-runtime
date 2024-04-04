@@ -10,11 +10,13 @@ export default class TestHostFunctions extends HostFunctionsNamespace {
             const msg=cp.read(msgOffset).text();
             console.error(msg);
             this.failCallback(msg);
+            return msgOffset;
         });
-        this.registerFunction("success", async (mng, jobId, cp, msgOffset: bigint) => {
+        this.registerFunction("success", async (mng, jobId, cp, msgOffset: bigint) =>  {
             const msg=cp.read(msgOffset).text();
             console.log(msg);
             this.successCallback(msg);
+            return msgOffset;
         });
     }
 

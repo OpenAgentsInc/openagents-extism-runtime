@@ -23,16 +23,13 @@ declare module "extism:host" {
             params: I64
         ): I64;
 
-
         Nostr_sendSignedEvent(eventOff: I64): I32;
         Nostr_subscribeToEvents(filtersJsonOffset: I64): I64;
         Nostr_unsubscribeFromEvents(subIdOff: I64): I32;
         Nostr_getEvents(subIdOff: I64, limit: I32): I64;
 
-
-        Test_fail(msgOffset: I64): void;
-        Test_success(msgOffset: I64): void;
-
+        Test_fail(msgOffset: I64): I64;
+        Test_success(msgOffset: I64): I64;
     }
     
 }

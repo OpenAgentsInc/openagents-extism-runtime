@@ -31,18 +31,23 @@ async function main() {
 
     const mergedFunctions = {};
     for (const hf of hostFunctions) {
-        Object.assign(mergedFunctions, hf.getHostFunctions(new JobManager(nostrConnector), ""));
+        const functions = hf.getHostFunctions(new JobManager(nostrConnector), "0");
+        for (const [name, func] of Object.entries(functions)) {
+            mergedFunctions[name] = func;
+        }
     }
+
+    console.log("Binding functions: ", mergedFunctions)
 
     const plugin = Extism.createPlugin("./plugin/plugin.wasm", {
         useWasi: true,
-        runInWorker: true,
+        runInWorker: false,
         functions: {
             env: mergedFunctions,
         },
     });
 
-    const res = (await plugin).call("run", "{}");
+    const res = await (await plugin).call("run", "{}");
     console.log(res);
 
 }
