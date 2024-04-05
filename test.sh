@@ -8,4 +8,4 @@ cd ../../..
 npm run build
 cp -Rvf src/test/plugin/ build/js/test/
 cd build/js/test/
-node --experimental-specifier-resolution=node  Test.js
+node --experimental-wasi-unstable-preview1 --experimental-specifier-resolution=node  Test.js

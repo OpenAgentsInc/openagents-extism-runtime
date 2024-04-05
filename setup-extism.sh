@@ -2,7 +2,7 @@
 set -e
 mkdir -p tmp
 cd tmp
-export $_sudo=""
+export _sudo=""
 
 if [ ! -d binaryen ]; then
   
