@@ -5,9 +5,7 @@ declare module "main" {
 
 declare module "extism:host" {
     interface user {
-        Test_fail(msgOffset: I64): void;
-        Test_success(msgOffset: I64): void;
-
+       
         Job_log(ptr: I64): void;
         Job_get(ptr: I64): I64;
         Job_isDone(ptr: I64): I32;
@@ -28,8 +26,7 @@ declare module "extism:host" {
         Nostr_unsubscribeFromEvents(subIdOff: I64): I32;
         Nostr_getEvents(subIdOff: I64, limit: I32): I64;
 
-        Test_fail(msgOffset: I64): I64;
-        Test_success(msgOffset: I64): I64;
+       
     }
     
 }

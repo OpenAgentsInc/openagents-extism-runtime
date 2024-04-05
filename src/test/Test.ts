@@ -1,7 +1,7 @@
 
 import JobManager from "../runtime/JobManager";
-import JobHostFunctions from "../runtime/binds/JobHostFunctions";
-import NostrHostFunctions from "../runtime/binds/NostrHostFunctions";
+import JobHostFunctionsMock from "./JobHostFunctionsMock";
+import NostrHostFunctionsMock from "./NostrHostFunctionsMock";
 import NostrConnectorClient from "../runtime/NostrConnectorClient";
 import TestHostFunctions from "../runtime/binds/TestHostFunctions";
 import * as Extism from "@extism/extism";
@@ -24,9 +24,9 @@ async function main() {
     }
 
     const hostFunctions = [
-        new JobHostFunctions(nostrConnector).interceptedBy(interceptor),
-        new NostrHostFunctions(nostrConnector).interceptedBy(interceptor),
-        new TestHostFunctions().interceptedBy(interceptor),
+        new JobHostFunctionsMock(nostrConnector),
+        new NostrHostFunctionsMock(nostrConnector),
+      
     ];
 
     const mergedFunctions = {};
@@ -43,7 +43,7 @@ async function main() {
         useWasi: true,
         runInWorker: false,
         functions: {
-            env: mergedFunctions,
+            "extism:host/user": mergedFunctions,
         },
     });
 

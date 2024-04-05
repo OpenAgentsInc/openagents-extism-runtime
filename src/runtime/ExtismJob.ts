@@ -60,7 +60,7 @@ export default class ExtismJob {
     async _loadFragment(path: string): Promise<Fragment> {
         const options = {
             useWasi: true,
-            runInWorker: true,
+            runInWorker: false,
             functions: {
                 "extism:host/user": this.hostFunctions,
             },
