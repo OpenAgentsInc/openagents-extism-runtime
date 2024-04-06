@@ -15,10 +15,11 @@ export default class JobHostFunctions extends HostFunctionsNamespace {
             const job:string=JSON.stringify(res);
             return cp.store(job);
         });
-        this.registerFunction("isDone", async (mng, _, cp, offs: bigint) => {
-            const res = await client.r(client.isJobDone({ jobId: cp.read(offs).text() }));
-            const v:Uint8Array = new Uint8Array(1);
-            return v[0]?1:0;
+        this.registerFunction("isDone", async (mng, currentJobId, cp, offs: bigint) => {
+            const jobId = cp.read(offs).text();
+            console.log("Check job" + jobId);
+            const res = await client.r(client.isJobDone({ jobId }));
+            return res.isDone ? BigInt(1) : BigInt(0);
         });
         this.registerFunction("newInputEventRef", async (mng, _, cp, eventIdOff: bigint, markerOff:bigint,sourceOff:bigint) => {
             const ref=cp.read(eventIdOff).text();
@@ -67,21 +68,37 @@ export default class JobHostFunctions extends HostFunctionsNamespace {
             const paramStr=JSON.stringify(param);
             return cp.store(paramStr);
         });
+        this.registerFunction("waitFor", async (mng, _, cp, jobIdOff: bigint) => {
+             const jobId = cp.read(jobIdOff).text();
+             while(true){
+                console.log("Check job" + jobId);
+                const res = await client.r(client.isJobDone({ jobId }));
+                console.log("Job done",res);
+                if(res.isDone){
+                    return  BigInt(1);
+                }else{
+                    await new Promise((res)=>setTimeout(res,100));
+                }
+             }
+             return  BigInt(0);
+             
+        });
         this.registerFunction("request", async (mng, _, cp, 
-            runOnOff: bigint, maxDuration:number, descriptionOff: bigint, 
-            inputJsonOffset:bigint, paramsJsonOffset:bigint) => {
-            const runOn=cp.read(runOnOff).text();          
-            const inputs=cp.read(inputJsonOffset).json();
-            const params=cp.read(paramsJsonOffset).json();  
-            const description=cp.read(descriptionOff).text();
-            const res = await client.r(client.requestJob({ 
-                runOn,
-                maxDuration,
-                input:inputs,
-                param:params,
-                description,
-                customerPrivateKey:""//TODO
-            }));
+            reqOff:bigint,
+        ) => {
+            const req = cp.read(reqOff).json();
+                
+            const res = await client.r(
+                client.requestJob({
+                    runOn: req.runOn,
+                    expireAfter: Number(req.expireAfter),
+                    input: req.inputs,
+                    param: req.params,
+                    description: req.description,
+                    kind: req.kind,
+                    outputFormat: req.outputFormata,
+                })
+            );
             const jobs: string = JSON.stringify(res);
             return cp.store(jobs);
         });

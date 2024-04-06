@@ -16,7 +16,7 @@ export default class NostrConnectorClient extends _NostrConnectorClient {
     async r<T extends object>(c: UnaryCall<object, T> | Promise<UnaryCall<object, T>>):Promise<T> {
         const cc = await c;
         const rpcStatus = await cc.status;
-        if ("" + rpcStatus.code != "0") {
+        if (!( rpcStatus.code.toString()=="0"|| rpcStatus.code.toString()=="OK")) {
             throw new Error(`rpc failed with status ${rpcStatus.code}: ${rpcStatus.detail}`);
         }
         return cc.response;

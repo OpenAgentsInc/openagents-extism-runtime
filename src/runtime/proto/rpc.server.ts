@@ -3,8 +3,8 @@
 // tslint:disable
 import { RpcGetEventsResponse } from "./rpc";
 import { RpcGetEventsRequest } from "./rpc";
-import { RpcUnsubscribeToEventsResponse } from "./rpc";
-import { RpcUnsubscribeToEventsRequest } from "./rpc";
+import { RpcUnsubscribeFromEventsResponse } from "./rpc";
+import { RpcUnsubscribeFromEventsRequest } from "./rpc";
 import { RpcSubscribeToEventsResponse } from "./rpc";
 import { RpcSubscribeToEventsRequest } from "./rpc";
 import { RpcSendSignedEventResponse } from "./rpc";
@@ -74,9 +74,9 @@ export interface INostrConnector<T = ServerCallContext> {
      */
     subscribeToEvents(request: RpcSubscribeToEventsRequest, context: T): Promise<RpcSubscribeToEventsResponse>;
     /**
-     * @generated from protobuf rpc: unsubscribeToEvents(RpcUnsubscribeToEventsRequest) returns (RpcUnsubscribeToEventsResponse);
+     * @generated from protobuf rpc: unsubscribeFromEvents(RpcUnsubscribeFromEventsRequest) returns (RpcUnsubscribeFromEventsResponse);
      */
-    unsubscribeToEvents(request: RpcUnsubscribeToEventsRequest, context: T): Promise<RpcUnsubscribeToEventsResponse>;
+    unsubscribeFromEvents(request: RpcUnsubscribeFromEventsRequest, context: T): Promise<RpcUnsubscribeFromEventsResponse>;
     /**
      * @generated from protobuf rpc: getEvents(RpcGetEventsRequest) returns (RpcGetEventsResponse);
      */

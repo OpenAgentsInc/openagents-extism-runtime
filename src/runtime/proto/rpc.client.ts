@@ -6,8 +6,8 @@ import type { ServiceInfo } from "@protobuf-ts/runtime-rpc";
 import { NostrConnector } from "./rpc";
 import type { RpcGetEventsResponse } from "./rpc";
 import type { RpcGetEventsRequest } from "./rpc";
-import type { RpcUnsubscribeToEventsResponse } from "./rpc";
-import type { RpcUnsubscribeToEventsRequest } from "./rpc";
+import type { RpcUnsubscribeFromEventsResponse } from "./rpc";
+import type { RpcUnsubscribeFromEventsRequest } from "./rpc";
 import type { RpcSubscribeToEventsResponse } from "./rpc";
 import type { RpcSubscribeToEventsRequest } from "./rpc";
 import type { RpcSendSignedEventResponse } from "./rpc";
@@ -79,9 +79,9 @@ export interface INostrConnectorClient {
      */
     subscribeToEvents(input: RpcSubscribeToEventsRequest, options?: RpcOptions): UnaryCall<RpcSubscribeToEventsRequest, RpcSubscribeToEventsResponse>;
     /**
-     * @generated from protobuf rpc: unsubscribeToEvents(RpcUnsubscribeToEventsRequest) returns (RpcUnsubscribeToEventsResponse);
+     * @generated from protobuf rpc: unsubscribeFromEvents(RpcUnsubscribeFromEventsRequest) returns (RpcUnsubscribeFromEventsResponse);
      */
-    unsubscribeToEvents(input: RpcUnsubscribeToEventsRequest, options?: RpcOptions): UnaryCall<RpcUnsubscribeToEventsRequest, RpcUnsubscribeToEventsResponse>;
+    unsubscribeFromEvents(input: RpcUnsubscribeFromEventsRequest, options?: RpcOptions): UnaryCall<RpcUnsubscribeFromEventsRequest, RpcUnsubscribeFromEventsResponse>;
     /**
      * @generated from protobuf rpc: getEvents(RpcGetEventsRequest) returns (RpcGetEventsResponse);
      */
@@ -178,11 +178,11 @@ export class NostrConnectorClient implements INostrConnectorClient, ServiceInfo 
         return stackIntercept<RpcSubscribeToEventsRequest, RpcSubscribeToEventsResponse>("unary", this._transport, method, opt, input);
     }
     /**
-     * @generated from protobuf rpc: unsubscribeToEvents(RpcUnsubscribeToEventsRequest) returns (RpcUnsubscribeToEventsResponse);
+     * @generated from protobuf rpc: unsubscribeFromEvents(RpcUnsubscribeFromEventsRequest) returns (RpcUnsubscribeFromEventsResponse);
      */
-    unsubscribeToEvents(input: RpcUnsubscribeToEventsRequest, options?: RpcOptions): UnaryCall<RpcUnsubscribeToEventsRequest, RpcUnsubscribeToEventsResponse> {
+    unsubscribeFromEvents(input: RpcUnsubscribeFromEventsRequest, options?: RpcOptions): UnaryCall<RpcUnsubscribeFromEventsRequest, RpcUnsubscribeFromEventsResponse> {
         const method = this.methods[11], opt = this._transport.mergeOptions(options);
-        return stackIntercept<RpcUnsubscribeToEventsRequest, RpcUnsubscribeToEventsResponse>("unary", this._transport, method, opt, input);
+        return stackIntercept<RpcUnsubscribeFromEventsRequest, RpcUnsubscribeFromEventsResponse>("unary", this._transport, method, opt, input);
     }
     /**
      * @generated from protobuf rpc: getEvents(RpcGetEventsRequest) returns (RpcGetEventsResponse);

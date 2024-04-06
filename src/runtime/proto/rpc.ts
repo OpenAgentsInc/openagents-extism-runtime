@@ -23,9 +23,9 @@ export interface RpcRequestJob {
      */
     runOn: string;
     /**
-     * @generated from protobuf field: uint64 maxDuration = 2;
+     * @generated from protobuf field: uint64 expireAfter = 2;
      */
-    maxDuration: number;
+    expireAfter: number;
     /**
      * @generated from protobuf field: repeated JobInput input = 3;
      */
@@ -35,13 +35,17 @@ export interface RpcRequestJob {
      */
     param: JobParam[];
     /**
-     * @generated from protobuf field: string customerPrivateKey = 5;
-     */
-    customerPrivateKey: string;
-    /**
      * @generated from protobuf field: string description = 6;
      */
     description: string;
+    /**
+     * @generated from protobuf field: optional uint32 kind = 7;
+     */
+    kind?: number;
+    /**
+     * @generated from protobuf field: optional string outputFormat = 8;
+     */
+    outputFormat?: string;
 }
 /**
  * @generated from protobuf message RpcGetJob
@@ -247,9 +251,9 @@ export interface RpcSendSignedEventResponse {
     success: boolean;
 }
 /**
- * @generated from protobuf message RpcUnsubscribeToEventsRequest
+ * @generated from protobuf message RpcUnsubscribeFromEventsRequest
  */
-export interface RpcUnsubscribeToEventsRequest {
+export interface RpcUnsubscribeFromEventsRequest {
     /**
      * @generated from protobuf field: string parentJob = 1;
      */
@@ -260,9 +264,9 @@ export interface RpcUnsubscribeToEventsRequest {
     subscriptionId: string;
 }
 /**
- * @generated from protobuf message RpcUnsubscribeToEventsResponse
+ * @generated from protobuf message RpcUnsubscribeFromEventsResponse
  */
-export interface RpcUnsubscribeToEventsResponse {
+export interface RpcUnsubscribeFromEventsResponse {
     /**
      * @generated from protobuf field: bool success = 1;
      */
@@ -273,20 +277,20 @@ class RpcRequestJob$Type extends MessageType<RpcRequestJob> {
     constructor() {
         super("RpcRequestJob", [
             { no: 1, name: "runOn", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 2, name: "maxDuration", kind: "scalar", T: 4 /*ScalarType.UINT64*/, L: 2 /*LongType.NUMBER*/ },
+            { no: 2, name: "expireAfter", kind: "scalar", T: 4 /*ScalarType.UINT64*/, L: 2 /*LongType.NUMBER*/ },
             { no: 3, name: "input", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => JobInput },
             { no: 4, name: "param", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => JobParam },
-            { no: 5, name: "customerPrivateKey", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
-            { no: 6, name: "description", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 6, name: "description", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 7, name: "kind", kind: "scalar", opt: true, T: 13 /*ScalarType.UINT32*/ },
+            { no: 8, name: "outputFormat", kind: "scalar", opt: true, T: 9 /*ScalarType.STRING*/ }
         ]);
     }
     create(value?: PartialMessage<RpcRequestJob>): RpcRequestJob {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.runOn = "";
-        message.maxDuration = 0;
+        message.expireAfter = 0;
         message.input = [];
         message.param = [];
-        message.customerPrivateKey = "";
         message.description = "";
         if (value !== undefined)
             reflectionMergePartial<RpcRequestJob>(this, message, value);
@@ -300,8 +304,8 @@ class RpcRequestJob$Type extends MessageType<RpcRequestJob> {
                 case /* string runOn */ 1:
                     message.runOn = reader.string();
                     break;
-                case /* uint64 maxDuration */ 2:
-                    message.maxDuration = reader.uint64().toNumber();
+                case /* uint64 expireAfter */ 2:
+                    message.expireAfter = reader.uint64().toNumber();
                     break;
                 case /* repeated JobInput input */ 3:
                     message.input.push(JobInput.internalBinaryRead(reader, reader.uint32(), options));
@@ -309,11 +313,14 @@ class RpcRequestJob$Type extends MessageType<RpcRequestJob> {
                 case /* repeated JobParam param */ 4:
                     message.param.push(JobParam.internalBinaryRead(reader, reader.uint32(), options));
                     break;
-                case /* string customerPrivateKey */ 5:
-                    message.customerPrivateKey = reader.string();
-                    break;
                 case /* string description */ 6:
                     message.description = reader.string();
+                    break;
+                case /* optional uint32 kind */ 7:
+                    message.kind = reader.uint32();
+                    break;
+                case /* optional string outputFormat */ 8:
+                    message.outputFormat = reader.string();
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -330,21 +337,24 @@ class RpcRequestJob$Type extends MessageType<RpcRequestJob> {
         /* string runOn = 1; */
         if (message.runOn !== "")
             writer.tag(1, WireType.LengthDelimited).string(message.runOn);
-        /* uint64 maxDuration = 2; */
-        if (message.maxDuration !== 0)
-            writer.tag(2, WireType.Varint).uint64(message.maxDuration);
+        /* uint64 expireAfter = 2; */
+        if (message.expireAfter !== 0)
+            writer.tag(2, WireType.Varint).uint64(message.expireAfter);
         /* repeated JobInput input = 3; */
         for (let i = 0; i < message.input.length; i++)
             JobInput.internalBinaryWrite(message.input[i], writer.tag(3, WireType.LengthDelimited).fork(), options).join();
         /* repeated JobParam param = 4; */
         for (let i = 0; i < message.param.length; i++)
             JobParam.internalBinaryWrite(message.param[i], writer.tag(4, WireType.LengthDelimited).fork(), options).join();
-        /* string customerPrivateKey = 5; */
-        if (message.customerPrivateKey !== "")
-            writer.tag(5, WireType.LengthDelimited).string(message.customerPrivateKey);
         /* string description = 6; */
         if (message.description !== "")
             writer.tag(6, WireType.LengthDelimited).string(message.description);
+        /* optional uint32 kind = 7; */
+        if (message.kind !== undefined)
+            writer.tag(7, WireType.Varint).uint32(message.kind);
+        /* optional string outputFormat = 8; */
+        if (message.outputFormat !== undefined)
+            writer.tag(8, WireType.LengthDelimited).string(message.outputFormat);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -1192,22 +1202,22 @@ class RpcSendSignedEventResponse$Type extends MessageType<RpcSendSignedEventResp
  */
 export const RpcSendSignedEventResponse = new RpcSendSignedEventResponse$Type();
 // @generated message type with reflection information, may provide speed optimized methods
-class RpcUnsubscribeToEventsRequest$Type extends MessageType<RpcUnsubscribeToEventsRequest> {
+class RpcUnsubscribeFromEventsRequest$Type extends MessageType<RpcUnsubscribeFromEventsRequest> {
     constructor() {
-        super("RpcUnsubscribeToEventsRequest", [
+        super("RpcUnsubscribeFromEventsRequest", [
             { no: 1, name: "parentJob", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 2, name: "subscriptionId", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
         ]);
     }
-    create(value?: PartialMessage<RpcUnsubscribeToEventsRequest>): RpcUnsubscribeToEventsRequest {
+    create(value?: PartialMessage<RpcUnsubscribeFromEventsRequest>): RpcUnsubscribeFromEventsRequest {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.parentJob = "";
         message.subscriptionId = "";
         if (value !== undefined)
-            reflectionMergePartial<RpcUnsubscribeToEventsRequest>(this, message, value);
+            reflectionMergePartial<RpcUnsubscribeFromEventsRequest>(this, message, value);
         return message;
     }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: RpcUnsubscribeToEventsRequest): RpcUnsubscribeToEventsRequest {
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: RpcUnsubscribeFromEventsRequest): RpcUnsubscribeFromEventsRequest {
         let message = target ?? this.create(), end = reader.pos + length;
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
@@ -1229,7 +1239,7 @@ class RpcUnsubscribeToEventsRequest$Type extends MessageType<RpcUnsubscribeToEve
         }
         return message;
     }
-    internalBinaryWrite(message: RpcUnsubscribeToEventsRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+    internalBinaryWrite(message: RpcUnsubscribeFromEventsRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
         /* string parentJob = 1; */
         if (message.parentJob !== "")
             writer.tag(1, WireType.LengthDelimited).string(message.parentJob);
@@ -1243,24 +1253,24 @@ class RpcUnsubscribeToEventsRequest$Type extends MessageType<RpcUnsubscribeToEve
     }
 }
 /**
- * @generated MessageType for protobuf message RpcUnsubscribeToEventsRequest
+ * @generated MessageType for protobuf message RpcUnsubscribeFromEventsRequest
  */
-export const RpcUnsubscribeToEventsRequest = new RpcUnsubscribeToEventsRequest$Type();
+export const RpcUnsubscribeFromEventsRequest = new RpcUnsubscribeFromEventsRequest$Type();
 // @generated message type with reflection information, may provide speed optimized methods
-class RpcUnsubscribeToEventsResponse$Type extends MessageType<RpcUnsubscribeToEventsResponse> {
+class RpcUnsubscribeFromEventsResponse$Type extends MessageType<RpcUnsubscribeFromEventsResponse> {
     constructor() {
-        super("RpcUnsubscribeToEventsResponse", [
+        super("RpcUnsubscribeFromEventsResponse", [
             { no: 1, name: "success", kind: "scalar", T: 8 /*ScalarType.BOOL*/ }
         ]);
     }
-    create(value?: PartialMessage<RpcUnsubscribeToEventsResponse>): RpcUnsubscribeToEventsResponse {
+    create(value?: PartialMessage<RpcUnsubscribeFromEventsResponse>): RpcUnsubscribeFromEventsResponse {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.success = false;
         if (value !== undefined)
-            reflectionMergePartial<RpcUnsubscribeToEventsResponse>(this, message, value);
+            reflectionMergePartial<RpcUnsubscribeFromEventsResponse>(this, message, value);
         return message;
     }
-    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: RpcUnsubscribeToEventsResponse): RpcUnsubscribeToEventsResponse {
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: RpcUnsubscribeFromEventsResponse): RpcUnsubscribeFromEventsResponse {
         let message = target ?? this.create(), end = reader.pos + length;
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
@@ -1279,7 +1289,7 @@ class RpcUnsubscribeToEventsResponse$Type extends MessageType<RpcUnsubscribeToEv
         }
         return message;
     }
-    internalBinaryWrite(message: RpcUnsubscribeToEventsResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+    internalBinaryWrite(message: RpcUnsubscribeFromEventsResponse, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
         /* bool success = 1; */
         if (message.success !== false)
             writer.tag(1, WireType.Varint).bool(message.success);
@@ -1290,9 +1300,9 @@ class RpcUnsubscribeToEventsResponse$Type extends MessageType<RpcUnsubscribeToEv
     }
 }
 /**
- * @generated MessageType for protobuf message RpcUnsubscribeToEventsResponse
+ * @generated MessageType for protobuf message RpcUnsubscribeFromEventsResponse
  */
-export const RpcUnsubscribeToEventsResponse = new RpcUnsubscribeToEventsResponse$Type();
+export const RpcUnsubscribeFromEventsResponse = new RpcUnsubscribeFromEventsResponse$Type();
 /**
  * @generated ServiceType for protobuf service NostrConnector
  */
@@ -1308,6 +1318,6 @@ export const NostrConnector = new ServiceType("NostrConnector", [
     { name: "logForJob", options: {}, I: RpcJobLog, O: Job },
     { name: "sendSignedEvent", options: {}, I: RpcSendSignedEventRequest, O: RpcSendSignedEventResponse },
     { name: "subscribeToEvents", options: {}, I: RpcSubscribeToEventsRequest, O: RpcSubscribeToEventsResponse },
-    { name: "unsubscribeToEvents", options: {}, I: RpcUnsubscribeToEventsRequest, O: RpcUnsubscribeToEventsResponse },
+    { name: "unsubscribeFromEvents", options: {}, I: RpcUnsubscribeFromEventsRequest, O: RpcUnsubscribeFromEventsResponse },
     { name: "getEvents", options: {}, I: RpcGetEventsRequest, O: RpcGetEventsResponse }
 ]);

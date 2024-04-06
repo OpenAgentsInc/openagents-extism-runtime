@@ -124,6 +124,10 @@ export interface Job {
      */
     id: string;
     /**
+     * @generated from protobuf field: uint32 kind = 14;
+     */
+    kind: number;
+    /**
      * @generated from protobuf field: string runOn = 2;
      */
     runOn: string;
@@ -570,6 +574,7 @@ class Job$Type extends MessageType<Job> {
     constructor() {
         super("Job", [
             { no: 1, name: "id", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 14, name: "kind", kind: "scalar", T: 13 /*ScalarType.UINT32*/ },
             { no: 2, name: "runOn", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
             { no: 3, name: "expiration", kind: "scalar", T: 4 /*ScalarType.UINT64*/, L: 2 /*LongType.NUMBER*/ },
             { no: 4, name: "timestamp", kind: "scalar", T: 4 /*ScalarType.UINT64*/, L: 2 /*LongType.NUMBER*/ },
@@ -587,6 +592,7 @@ class Job$Type extends MessageType<Job> {
     create(value?: PartialMessage<Job>): Job {
         const message = globalThis.Object.create((this.messagePrototype!));
         message.id = "";
+        message.kind = 0;
         message.runOn = "";
         message.expiration = 0;
         message.timestamp = 0;
@@ -608,6 +614,9 @@ class Job$Type extends MessageType<Job> {
             switch (fieldNo) {
                 case /* string id */ 1:
                     message.id = reader.string();
+                    break;
+                case /* uint32 kind */ 14:
+                    message.kind = reader.uint32();
                     break;
                 case /* string runOn */ 2:
                     message.runOn = reader.string();
@@ -660,6 +669,9 @@ class Job$Type extends MessageType<Job> {
         /* string id = 1; */
         if (message.id !== "")
             writer.tag(1, WireType.LengthDelimited).string(message.id);
+        /* uint32 kind = 14; */
+        if (message.kind !== 0)
+            writer.tag(14, WireType.Varint).uint32(message.kind);
         /* string runOn = 2; */
         if (message.runOn !== "")
             writer.tag(2, WireType.LengthDelimited).string(message.runOn);
