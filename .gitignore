@@ -5,6 +5,7 @@ prototmp
 stabledocs.toml
 src/test/plugin/plugin.wasm
 src/test/plugin/bundle
+src/test/plugin/.hash
 node_modules
 build
 tmp
