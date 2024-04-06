@@ -136,8 +136,29 @@ class Job {
 
 
     static async waitFor(jobId) {
+        jobId = await jobId;
         const mem = Memory.fromString(jobId);
         await Job_waitFor(mem.offset);
+        return Job.get(jobId);
+    }
+
+
+    static async pluginRequest(plugin, inputData, description, expireAfter) {
+        const req = {
+            runOn: "openagents/extism-runtime",
+            expireAfter: expireAfter || Date.now() + 1000 * 60 * 60,
+            description: description || "",
+            inputs: [
+                await Job.newInputData(JSON.stringify(inputData))
+            ],
+            params: [
+                await Job.newParam("main", plugin)
+            ],
+            kind: undefined,
+            outputFormat: undefined
+        };
+        const subReqId = (await Job.request(req)).id;
+        return subReqId;
     }
 }
 
