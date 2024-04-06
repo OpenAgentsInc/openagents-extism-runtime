@@ -3,7 +3,6 @@ import JobManager from "../runtime/JobManager";
 import JobHostFunctionsMock from "./JobHostFunctionsMock";
 import NostrHostFunctionsMock from "./NostrHostFunctionsMock";
 import NostrConnectorClient from "../runtime/NostrConnectorClient";
-import TestHostFunctions from "../runtime/binds/TestHostFunctions";
 import * as Extism from "@extism/extism";
 
 async function main() {
@@ -12,21 +11,9 @@ async function main() {
     const nostrConnector = new NostrConnectorClient(IP, PORT);
 
 
-    const interceptor = (
-        functioName,
-        mng,
-        jobId,
-        callContext,
-        ...args
-    ) => {
-        console.log("Intercepted function call: ", functioName, args);
-        return args;
-    }
-
     const hostFunctions = [
         new JobHostFunctionsMock(nostrConnector),
-        new NostrHostFunctionsMock(nostrConnector),
-      
+        new NostrHostFunctionsMock(nostrConnector),      
     ];
 
     const mergedFunctions = {};
@@ -36,12 +23,11 @@ async function main() {
             mergedFunctions[name] = func;
         }
     }
-
-    console.log("Binding functions: ", mergedFunctions)
+ 
 
     const plugin = Extism.createPlugin("./plugin/plugin.wasm", {
         useWasi: true,
-        runInWorker: false,
+        runInWorker: true,
         functions: {
             "extism:host/user": mergedFunctions,
         },
@@ -50,6 +36,10 @@ async function main() {
     const res = await (await plugin).call("run", "{}");
     console.log(res);
 
+    for (const k in hostFunctions) {
+        const m = hostFunctions[k];
+        console.log(await m.check());
+    }
 }
 
 main();
