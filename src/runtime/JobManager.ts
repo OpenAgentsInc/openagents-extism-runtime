@@ -79,6 +79,12 @@ export default class JobManager {
                                 reason: e.toString(),
                             });
                         });
+                    }).catch((e) => {
+                        console.error("Error initializing job", e);
+                        this.conn.cancelJob({
+                            jobId: job.id,
+                            reason: e.toString(),
+                        });
                     });
                 }catch(e){
                     console.error("Error starting job",job.id,e);
