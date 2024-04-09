@@ -146,7 +146,7 @@ class Job {
     static async pluginRequest(plugin, inputData, description, expireAfter) {
         const req = {
             runOn: "openagents/extism-runtime",
-            expireAfter: expireAfter || Date.now() + 1000 * 60 * 60,
+            expireAfter: expireAfter ||  1000 * 60 * 60,
             description: description || "",
             inputs: [
                 await Job.newInputData(JSON.stringify(inputData))
