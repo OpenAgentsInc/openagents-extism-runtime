@@ -1,7 +1,11 @@
-import { NostrConnectorClient  } from "./proto/rpc.client";
+import { 
+    NostrConnectorClient,    
+    PendingJobs, 
+    Job, 
+    JobInput
+} from "openagents-grpc-proto";
 
-import {PendingJobs} from "./proto/rpc";
-import { Job, JobInput } from "./proto/Protocol";
+
 import ExtismJob from "./ExtismJob";
 import { CallContext, CurrentPlugin } from "@extism/extism";
  import {ExtismFunction, HostFunctionsNamespace} from "./HostFunctionsNamespace";

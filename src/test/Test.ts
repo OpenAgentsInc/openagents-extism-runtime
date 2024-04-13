@@ -2,7 +2,7 @@
 import JobManager from "../runtime/JobManager";
 import JobHostFunctionsMock from "./JobHostFunctionsMock";
 import NostrHostFunctionsMock from "./NostrHostFunctionsMock";
-import NostrConnectorClient from "../runtime/NostrConnectorClient";
+import NostrConnectorClient from "../runtime/PoolConnectorClient";
 import * as Extism from "@extism/extism";
 
 async function main() {

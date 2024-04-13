@@ -1,14 +1,27 @@
-import { NostrConnectorClient as _NostrConnectorClient } from "./proto/rpc.client";
+import { NostrConnectorClient as _NostrConnectorClient } from "openagents-grpc-proto";
 import * as GRPC from "@grpc/grpc-js";
 import { GrpcTransport } from "@protobuf-ts/grpc-transport";
 import type { UnaryCall } from "@protobuf-ts/runtime-rpc";
 
-export default class NostrConnectorClient extends _NostrConnectorClient {
-    constructor(ip, port) {
+export default class PoolConnectorClient extends _NostrConnectorClient {
+    constructor(
+        ip:string, 
+        port:number,
+        rootCerts?: Buffer,
+        privateKey?: Buffer,
+        publicKey?: Buffer
+    ) {
         super(
             new GrpcTransport({
                 host: `${ip}:${port}`,
-                channelCredentials: GRPC.ChannelCredentials.createInsecure(),
+                channelCredentials: 
+                (!rootCerts || !privateKey || !publicKey)?
+                GRPC.ChannelCredentials.createInsecure():
+                GRPC.ChannelCredentials.createSsl(
+                    rootCerts,
+                    privateKey,
+                    publicKey,
+                )        
             })
         );
     }

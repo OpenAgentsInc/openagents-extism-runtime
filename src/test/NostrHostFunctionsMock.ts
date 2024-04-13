@@ -1,6 +1,6 @@
 import { CallContext } from "@extism/extism";
 import { HostFunctionsNamespace } from "../runtime/HostFunctionsNamespace";
-import NostrConnectorClient from "../runtime/NostrConnectorClient";
+import NostrConnectorClient from "../runtime/PoolConnectorClient";
 import { JobInput, JobParam } from "../runtime/proto/Protocol";
 import MockFunctions from "./MockFunctions";
 export default class NostrHostFunctionsMock extends MockFunctions {

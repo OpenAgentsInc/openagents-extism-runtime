@@ -1,6 +1,6 @@
 import { CallContext } from "@extism/extism";
 import { HostFunctionsNamespace } from "../HostFunctionsNamespace";
-import  NostrConnectorClient  from "../NostrConnectorClient";
+import  NostrConnectorClient  from "../PoolConnectorClient";
 import { JobInput, JobParam } from "../proto/Protocol";
 export default class NostrHostFunctions extends HostFunctionsNamespace {
     constructor(client: NostrConnectorClient) {
