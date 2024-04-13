@@ -1,7 +1,6 @@
-import { CallContext } from "@extism/extism";
 import { HostFunctionsNamespace } from "../HostFunctionsNamespace";
 import NostrConnectorClient from "../PoolConnectorClient";
-import { JobInput, JobParam } from "../proto/Protocol";
+import { JobInput,JobParam } from "openagents-grpc-proto";
 export default class JobHostFunctions extends HostFunctionsNamespace {
     constructor(client: NostrConnectorClient) {
         super("Job");
