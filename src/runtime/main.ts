@@ -24,8 +24,8 @@ async function main(){
     
 
     const ICON_URL = process.env.ICON_URL || "";
-    const NAME = process.env.NAME || "Extism Plugin Runner";
-    const DESCRIPTION = process.env.DESCRIPTION || "Run an extism plugin";
+    const NAME = process.env.NAME || "Extism Plugin Runner Node";
+    const DESCRIPTION = process.env.DESCRIPTION || "A node that runs extism plugins";
 
     const poolConnector = new PoolConnectorClient(IP, PORT, CA_CRT, CLIENT_KEY, CLIENT_CRT);
 

@@ -11,10 +11,10 @@ export default class Announcer {
             template: {
                 kind: 5003,
                 tags: [
-                    ["name", "Extism Plugin Runner"],
+                    ["name", "Extism Action"],
                     ["param", "run-on", "openagents/extism-runtime"],
                     ["param", "main", "%PLUGIN_PATH%"],
-                    ["about", "Run an extism plugin"],
+                    ["about", "An action that runs an extism plugin with some input"],
                     ["i", "%INPUT%"],
                     ["tos", ""],
                     ["privacy", ""],
