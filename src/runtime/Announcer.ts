@@ -21,6 +21,39 @@ export default class Announcer {
                     ["author", ""],
                     ["web", ""],
                     ["picture", ""],
+                    ["ui-socket-data",
+                        JSON.stringify({
+                            in: { // parameters
+                                "INPUT_DATA" : {
+                                    name: "Input Data",
+                                    type: "string",
+                                    about:"Plugin input data in json"
+                                },
+                                "INPUT_PLUGIN_PATH":{
+                                    name: "Plugin",
+                                    type: "string",
+                                    about:"Http(s) path to the plugin to run"
+                                }
+                            },
+                            out:{ // Multi output node?
+                                "OUTPUT":{
+                                    name: "Output Data",
+                                    type: "string",
+                                    about:"Plugin output data in json"
+                                }
+                            },
+                            sys: {
+                                "EXPIRATION_TIMESTAMP_SECONDS":{
+                                    type: "string",
+                                    value: "EXPIRATION_TIMESTAMP"
+                                },
+                                "TIMESTAMP_SECONDS_NUMBER":{
+                                    type: "int",
+                                    value: "CURRENT_TIMESTAMP"
+                                },                                
+                            }
+                        }),
+                    ],
                 ],
             },
         },
@@ -30,12 +63,7 @@ export default class Announcer {
     description: string = "";
     nextNodeAnnouncementTimestamp: number = 0;
 
-    constructor(
-        conn: PoolConnectorClient,
-        name: string,
-        iconUrl: string,
-        description: string
-    ) {
+    constructor(conn: PoolConnectorClient, name: string, iconUrl: string, description: string) {
         this.conn = conn;
         this.name = name;
         this.iconUrl = iconUrl;
@@ -54,23 +82,25 @@ export default class Announcer {
 
     async _loop() {
         try {
-            if(Date.now()>=this.nextNodeAnnouncementTimestamp){
+            if (Date.now() >= this.nextNodeAnnouncementTimestamp) {
                 const res = await this.conn.r(
                     this.conn.announceNode({
                         iconUrl: this.iconUrl,
                         name: this.name,
-                        description: this.description
+                        description: this.description,
                     })
                 );
-                const refreshTime= res.refreshInterval;
+                const refreshTime = res.refreshInterval;
                 this.nextNodeAnnouncementTimestamp = Date.now() + refreshTime;
             }
 
             for (const template of this.templates) {
                 if (Date.now() >= template.nextAnnounceTimestamp) {
-                    const res=await this.conn.r(this.conn.announceEventTemplate({
-                        eventTemplate: JSON.stringify(template.template, null, 2),
-                    }));
+                    const res = await this.conn.r(
+                        this.conn.announceEventTemplate({
+                            eventTemplate: JSON.stringify(template.template, null, 2),
+                        })
+                    );
                     const refreshInterval = res.refreshInterval;
                     template.nextAnnounceTimestamp = Date.now() + refreshInterval;
                 }

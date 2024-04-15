@@ -6,7 +6,7 @@ export default class NostrHostFunctions extends HostFunctionsNamespace {
         super("Nostr");
         this.registerFunction("sendSignedEvent", async (mng, jobId, cp, eventOff: bigint) => {
             const res =await client.r(client.sendSignedEvent({
-                parentJob: jobId,
+                groupId: jobId,
                 event: cp.read(eventOff).text(),
             }));
   
@@ -14,29 +14,35 @@ export default class NostrHostFunctions extends HostFunctionsNamespace {
         });
         this.registerFunction("subscribeToEvents", async (mng, jobId, cp, filtersJsonOffset: bigint) => {
             const filters = cp.read(filtersJsonOffset).json();
-            const res = await client.r(client.subscribeToEvents({
-                parentJob: jobId,
-                filters,
-            }));
+            const res = await client.r(
+                client.subscribeToEvents({
+                    groupId: jobId,
+                    filters,
+                })
+            );
             const subId = res.subscriptionId;
             return cp.store(subId);
         });
 
         this.registerFunction("unsubscribeFromEvents", async (mng, jobId, cp, subIdOff: bigint) => {
-            const res = await client.r(client.unsubscribeFromEvents({
-                parentJob: jobId,
-                subscriptionId: cp.read(subIdOff).text(),
-            }));
+            const res = await client.r(
+                client.unsubscribeFromEvents({
+                    groupId: jobId,
+                    subscriptionId: cp.read(subIdOff).text(),
+                })
+            );
           
             return BigInt(res.success?1:0);
         });
 
         this.registerFunction("getEvents", async (mng, jobId, cp, subIdOff: bigint, limit: bigint) => {
-            const res = await client.r(client.getEvents({
-                parentJob: jobId,
-                subscriptionId: cp.read(subIdOff).text(),
-                limit:Number(limit),
-            }));
+            const res = await client.r(
+                client.getEvents({
+                    groupId: jobId,
+                    subscriptionId: cp.read(subIdOff).text(),
+                    limit: Number(limit),
+                })
+            );
             const events = JSON.stringify(res.events);
             return cp.store(events);
         });
