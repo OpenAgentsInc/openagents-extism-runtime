@@ -13,9 +13,9 @@ export default class Announcer {
                 tags: [
                     ["name", "Extism Action"],
                     ["param", "run-on", "openagents/extism-runtime"],
-                    ["param", "main", "%PLUGIN_PATH%"],
+                    ["param", "main", "%INPUT_PLUGIN_PATH%"],
                     ["about", "An action that runs an extism plugin with some input"],
-                    ["i", "%INPUT%"],
+                    ["i", "%INPUT_DATA%"],
                     ["tos", ""],
                     ["privacy", ""],
                     ["author", ""],
