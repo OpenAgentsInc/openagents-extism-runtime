@@ -77,7 +77,7 @@ class LocalSecretProvider extends SecretProvider {
 }
 
 export default class Secrets {
-    providers: SecretProvider[];
+    providers: SecretProvider[]= [];
     namespace(ns: string): SecretNamespace {
         return new SecretNamespace(this.providers, ns);
     }
