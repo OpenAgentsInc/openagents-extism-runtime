@@ -18,7 +18,7 @@ async function main() {
 
     const mergedFunctions = {};
     for (const hf of hostFunctions) {
-        const functions = hf.getHostFunctions(new JobManager(nostrConnector), "0");
+        const functions = hf.getHostFunctions(new JobManager(nostrConnector), "0","0","0");
         for (const [name, func] of Object.entries(functions)) {
             mergedFunctions[name] = func;
         }

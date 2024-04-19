@@ -18,10 +18,9 @@ export default class JobManager {
     stopNow: boolean = false;
     jobs: ExtismJob[] = [];
     hostNamespaces: Array<HostFunctionsNamespace> = [];
-    secrets:Secrets;
-    constructor(conn: PoolConnectorClient, secrets:Secrets) {
+    
+    constructor(conn: PoolConnectorClient) {
         this.conn = conn;
-        this.secrets = secrets;
     }
 
     async registerNamespace(namespace: HostFunctionsNamespace) {
