@@ -12,7 +12,6 @@ type Fragment = {
 
 export default class ExtismJob {
     mainPluginPath: string;
-    dependenciesPaths: string[];
     initialized: boolean = false;
 
     main: Fragment;
@@ -26,13 +25,11 @@ export default class ExtismJob {
     constructor(
         jobId: string,
         mainPluginPath: string,
-        dependenciesPaths: string[],
         expiration: number,
         hostFunctions: { [key: string]: ExtismFunction }
     ) {
         // TODO: check origins
         this.mainPluginPath = mainPluginPath;
-        this.dependenciesPaths = dependenciesPaths;
         this.expiration = expiration;
         this.jobId = jobId;
         this.hostFunctions = hostFunctions;
@@ -41,10 +38,7 @@ export default class ExtismJob {
     async init() {
         if (this.initialized) throw new Error("Already initialized");
         this.main = await this._loadFragment(this.mainPluginPath);
-        for (let i = 0; i < this.dependenciesPaths.length; i++) {
-            const fragment = await this._loadFragment(this.dependenciesPaths[i]);
-            this.dependencies.push(fragment);
-        }
+     
 
         this.initialized = true;
         for (const plugin of [this.main, ...this.dependencies]) {

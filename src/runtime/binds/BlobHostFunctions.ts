@@ -1,37 +1,90 @@
 import { HostFunctionsNamespace } from "../HostFunctionsNamespace";
-import NostrConnectorClient from "../PoolConnectorClient";
-import { JobInput,JobParam } from "openagents-grpc-proto";
-export default class JobHostFunctions extends HostFunctionsNamespace {
-    constructor(client: NostrConnectorClient) {
-        super("Job");
-        this.registerFunction("log", async (mng, pluginPath, pluginId, jobId, cp, offs: bigint) => {
-            const log = cp.read(offs).text();
-            client.logForJob({ jobId: jobId, log });
-        });
-        this.registerFunction("get", async (mng, pluginPath, pluginId, currentJobId, cp, offs: bigint) => {
-            const jobId = cp.read(offs).text() || currentJobId;
-            const res = await client.r(client.getJob({ jobId }));
-            const job: string = JSON.stringify(res);
-            return cp.store(job);
-        });
-        this.registerFunction("isDone", async (mng, pluginPath, pluginId, currentJobId, cp, offs: bigint) => {
-            const jobId = cp.read(offs).text();
-            console.log("Check job" + jobId);
-            const res = await client.r(client.isJobDone({ jobId }));
-            return res.isDone ? BigInt(1) : BigInt(0);
-        });
+import PoolConnectorClient from "../PoolConnectorClient";
+import { JobInput, JobParam } from "openagents-grpc-proto";
+
+export default class BlobHostFunctions extends HostFunctionsNamespace {
+    constructor(client: PoolConnectorClient) {
+        super("BlobStore");
+       
         this.registerFunction(
-            "newInputEventRef",
+            "create",
             async (
                 mng,
                 pluginPath,
                 pluginId,
-                _,
+                currentJobId,
                 cp,
-                eventIdOff: bigint,
-                markerOff: bigint,
-                sourceOff: bigint
+                nameOff: bigint,
+                encryptionKeyOff: bigint,
+                includeEncryptionKeyInUrlOff: bigint
             ) => {
+                const name = cp.read(nameOff).text();
+                const encryptionKey = cp.read(encryptionKeyOff).text();
+                const includeEncryptionKeyInUrl = Number(includeEncryptionKeyInUrlOff) == 1;
+                const url=(await client.r(client.createDisk({    
+                    name,
+                    encryptionKey,
+                    includeEncryptionKeyInUrl,
+                }))).url;
+
+                return cp.store(url);
+            }
+        );
+        this.registerFunction("open", async (mng, pluginPath, pluginId, currentJobId, cp, urlOff: bigint) => {
+            const url = cp.read(urlOff).text();
+            const res = await client.r(client.openDisk({ url }));
+            return cp.store(res.diskId);
+        });
+        this.registerFunction(
+            "close",
+            async (mng, pluginPath, pluginId, currentJobId, cp, diskIdOff: bigint) => {
+                const diskId = cp.read(diskIdOff).text();
+                await client.r(client.closeDisk({ diskId }));
+            }
+        );
+        this.registerFunction(
+            "del",
+            async (mng, pluginPath, pluginId, currentJobId, cp, diskIdOff:bigint, pathOff: bigint) => {
+                const path=cp.read(pathOff).text();
+                const diskId=cp.read(diskIdOff).text();
+                await client.r(client.diskDeleteFile({diskId, path}));
+            }
+        );
+        this.registerFunction(
+            "read",
+            async (mng, pluginPath, pluginId, currentJobId, cp, diskIdOff:bigint, pathOff: bigint) => {
+                const path=cp.read(pathOff).text();
+                const diskId=cp.read(diskIdOff).text();
+                // resizable buffer
+                const chunks=[]
+                for await(const chunk of await client.rS(client.diskReadFile({diskId, path}))){
+                    chunks.push(chunk);
+                }
+                const buffer=Buffer.concat(chunks);
+                return cp.store(buffer);
+            }
+        );
+
+        this.registerFunction(
+            "write",
+            async (mng, pluginPath, pluginId, currentJobId, cp, diskIdOff: bigint, pathOff: bigint, bufferOff:bigint) => {
+                const path = cp.read(pathOff).text();
+                const diskId = cp.read(diskIdOff).text();
+                const buffer=cp.read(bufferOff).bytes();
+                const CHUNK_SIZE = 1024 * 1024;
+                const writer = client.diskWriteFile();
+                for(let i=0;i<buffer.length;i+=CHUNK_SIZE){
+                    writer.requests.send({diskId, path, data: buffer.slice(i, i + CHUNK_SIZE)});          
+                }
+                await writer.requests.complete();
+            }
+        );
+
+        
+
+        this.registerFunction(
+            "newInputEventRef",
+            async (mng, pluginPath, pluginId,_, cp, eventIdOff: bigint, markerOff: bigint, sourceOff: bigint) => {
                 const ref = cp.read(eventIdOff).text();
                 const marker = cp.read(markerOff).text();
                 const source = cp.read(sourceOff).text();
@@ -128,12 +181,5 @@ export default class JobHostFunctions extends HostFunctionsNamespace {
             const jobs: string = JSON.stringify(res);
             return cp.store(jobs);
         });
-
     }
-   
-
-    
-
-
-
 }

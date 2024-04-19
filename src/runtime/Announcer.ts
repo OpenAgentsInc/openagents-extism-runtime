@@ -8,54 +8,49 @@ export default class Announcer {
     templates = [
         {
             nextAnnounceTimestamp: 0,
-            template: {
+            sockets: JSON.stringify({   
+                in: { // parameters
+                    "input_data" : {
+                        name: "Input Data",
+                        type: "string",
+                        about:"Plugin input data as a json string"
+                    },
+                    "pluginPath":{
+                        name: "Plugin",
+                        type: "string",
+                        about:"Http(s) path to the plugin to run"
+                    }
+                },
+                out:{
+                    "output_type":{
+                        name: "Expected output type",
+                        type: "string",
+                        about: "mime type of the output",
+                        value: "application/json"
+                    }
+                }
+            }),  
+            meta: JSON.stringify({
                 kind: 5003,
+                name: "Extism plugin Action",
+                about: "Run an extism plugin with some input",
+                tos: "",
+                privacy: "",
+                web: "",
+                picture: "",
+                tags: ["tool-internal"]
+            }),
+            template:`{
+                "kind": {{meta.kind}},
+                "created_at": {{sys.timestamp_seconds}},
                 tags: [
-                    ["name", "Extism Action"],
                     ["param", "run-on", "openagents/extism-runtime"],
-                    ["param", "main", "%INPUT_PLUGIN_PATH%"],
-                    ["about", "An action that runs an extism plugin with some input"],
-                    ["i", "%INPUT_DATA%"],
-                    ["tos", ""],
-                    ["privacy", ""],
-                    ["author", ""],
-                    ["web", ""],
-                    ["picture", ""],
-                    ["ui-socket-data",
-                        JSON.stringify({
-                            in: { // parameters
-                                "INPUT_DATA" : {
-                                    name: "Input Data",
-                                    type: "string",
-                                    about:"Plugin input data in json"
-                                },
-                                "INPUT_PLUGIN_PATH":{
-                                    name: "Plugin",
-                                    type: "string",
-                                    about:"Http(s) path to the plugin to run"
-                                }
-                            },
-                            out:{ // Multi output node?
-                                "OUTPUT":{
-                                    name: "Output Data",
-                                    type: "string",
-                                    about:"Plugin output data in json"
-                                }
-                            },
-                            sys: {
-                                "EXPIRATION_TIMESTAMP_SECONDS":{
-                                    type: "string",
-                                    value: "EXPIRATION_TIMESTAMP"
-                                },
-                                "TIMESTAMP_SECONDS_NUMBER":{
-                                    type: "int",
-                                    value: "CURRENT_TIMESTAMP"
-                                },                                
-                            }
-                        }),
-                    ],
+                    ["param", "main", "{{in.pluginPath}}"],
+                    ["i", "{{in.input_data}}"],
+                    ["expiration", "{{sys.expiration_timestamp_seconds}}"]      
+                    ["output", "{{out.output_type}}"]              
                 ],
-            },
+            }`,
         },
     ];
     iconUrl: string = "";
@@ -98,7 +93,9 @@ export default class Announcer {
                 if (Date.now() >= template.nextAnnounceTimestamp) {
                     const res = await this.conn.r(
                         this.conn.announceEventTemplate({
-                            eventTemplate: JSON.stringify(template.template, null, 2),
+                            meta: template.meta,
+                            sockets: template.sockets,
+                            template: template.template,
                         })
                     );
                     const refreshInterval = res.refreshInterval;

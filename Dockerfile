@@ -24,5 +24,9 @@ ENV POOL_CA_CRT=""
 ENV POOL_CLIENT_CRT=""
 ENV POOL_CLIENT_KEY=""
 
+ENV SECRETS_PROVIDERS="/secrets/secrets.json"
+
+VOLUME /secrets
+
 USER 1000
 CMD ["npm","run", "start"]

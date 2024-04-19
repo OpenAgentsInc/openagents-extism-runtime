@@ -9,6 +9,8 @@ import {
 import ExtismJob from "./ExtismJob";
 import { CallContext, CurrentPlugin } from "@extism/extism";
  import {ExtismFunction, HostFunctionsNamespace} from "./HostFunctionsNamespace";
+import Secrets from "./Secrets";
+import Crypto from "crypto";
 
 export default class JobManager {
     conn: PoolConnectorClient;
@@ -16,8 +18,10 @@ export default class JobManager {
     stopNow: boolean = false;
     jobs: ExtismJob[] = [];
     hostNamespaces: Array<HostFunctionsNamespace> = [];
-    constructor(conn: PoolConnectorClient) {
+    secrets:Secrets;
+    constructor(conn: PoolConnectorClient, secrets:Secrets) {
         this.conn = conn;
+        this.secrets = secrets;
     }
 
     async registerNamespace(namespace: HostFunctionsNamespace) {
@@ -50,11 +54,10 @@ export default class JobManager {
                     const input = inputs[0];
 
                     const inputData = input.data;
-                    const pluginMain: string = job.param.find((param) => param.key == "main")?.value[0] || "";
-                    const pluginDeps: string[] =
-                        job.param.find((param) => param.key == "dependencies")?.value || [];
+                    const pluginMain: string = job.param.find((param) => param.key == "main")?.value[0] || "";         
                     const maxExecutionTime = job.maxExecutionTime;
                     const expiration = Math.min(Date.now() + maxExecutionTime, job.expiration);
+                    const pluginMainSHAHash=Crypto.createHash('sha256').update(pluginMain).digest('hex');
 
                     const mergedHostFunctions: {
                         [key: string]: ExtismFunction;
@@ -62,7 +65,9 @@ export default class JobManager {
                     for (const namespace of this.hostNamespaces) {
                         const functions: { [key: string]: ExtismFunction } = namespace.getHostFunctions(
                             this,
-                            job.id
+                            job.id,
+                            pluginMain,
+                            pluginMainSHAHash
                         );
                         for (const [name, func] of Object.entries(functions)) {
                             mergedHostFunctions[name] = func;
@@ -72,7 +77,6 @@ export default class JobManager {
                     const plugin = new ExtismJob(
                         job.id,
                         pluginMain,
-                        pluginDeps,
                         expiration,
                         mergedHostFunctions
                     );

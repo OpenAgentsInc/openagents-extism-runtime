@@ -8,6 +8,7 @@ import JobHostFunctions from "./binds/JobHostFunctions";
 import NostrHostFunctions from "./binds/NostrHostFunctions";
 import PoolConnectorClient from "./PoolConnectorClient";
 import Announcer from "./Announcer";
+import Secrets from "./Secrets";
 async function main(){
     const IP = process.env.POOL_ADDRESS || "127.0.0.1";
     const PORT = Number(process.env.POOL_PORT || 5000);
@@ -21,18 +22,26 @@ async function main(){
         CLIENT_CRT_PATH && Fs.existsSync(CLIENT_CRT_PATH) ? Fs.readFileSync(CLIENT_CRT_PATH) : undefined;
     const CLIENT_KEY: Buffer | undefined =
         CLIENT_KEY_PATH && Fs.existsSync(CLIENT_KEY_PATH) ? Fs.readFileSync(CLIENT_KEY_PATH) : undefined;
+
+    const SECRETS_PROVIDERS: string[] = process.env.SECRETS_PROVIDERS ? process.env.SECRETS_PROVIDERS.split(",") : ["./data/secrets.json"];
     
 
     const ICON_URL = process.env.ICON_URL || "";
     const NAME = process.env.NAME || "Extism Plugin Runner Node";
     const DESCRIPTION = process.env.DESCRIPTION || "A node that runs extism plugins";
 
+
+    const secrets = new Secrets();
+    for (const provider of SECRETS_PROVIDERS) {
+        secrets.addProvider(provider);
+    }
+
     const poolConnector = new PoolConnectorClient(IP, PORT, CA_CRT, CLIENT_KEY, CLIENT_CRT);
 
     const announcer = new Announcer(poolConnector, NAME, ICON_URL, DESCRIPTION);
     announcer.start();
 
-    const jobManager:JobManager= new JobManager(poolConnector);
+    const jobManager: JobManager = new JobManager(poolConnector, secrets);
     jobManager.registerNamespace(new JobHostFunctions(poolConnector));
     jobManager.registerNamespace(new NostrHostFunctions(poolConnector));    
     await jobManager.start();
