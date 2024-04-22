@@ -13,7 +13,8 @@ import SecretHostFunctions from "./binds/SecretsHostFunctions";
 async function main(){
     const IP = process.env.POOL_ADDRESS || "127.0.0.1";
     const PORT = Number(process.env.POOL_PORT || 5000);
-    
+    const POOL_SSL = (process.env.POOL_SSL || "false") == "true";
+
     const CA_CRT_PATH: string = process.env.POOL_CA_CRT || "";
     const CLIENT_CRT_PATH: string = process.env.POOL_CLIENT_CRT || "";
     const CLIENT_KEY_PATH: string = process.env.POOL_CLIENT_KEY || "";
@@ -37,7 +38,7 @@ async function main(){
         secrets.addProvider(provider);
     }
 
-    const poolConnector = new PoolConnectorClient(IP, PORT, CA_CRT, CLIENT_KEY, CLIENT_CRT);
+    const poolConnector = new PoolConnectorClient(IP, PORT, POOL_SSL, CA_CRT, CLIENT_KEY, CLIENT_CRT);
 
     const announcer = new Announcer(poolConnector, NAME, ICON_URL, DESCRIPTION);
     announcer.start();

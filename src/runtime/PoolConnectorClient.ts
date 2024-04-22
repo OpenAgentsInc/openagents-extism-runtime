@@ -4,16 +4,19 @@ import { GrpcTransport } from "@protobuf-ts/grpc-transport";
 import type { UnaryCall,RpcOutputStream, ServerStreamingCall } from "@protobuf-ts/runtime-rpc";
 
 export default class PoolConnectorClient extends _PoolConnectorClient {
-    constructor(ip: string, port: number, rootCerts?: Buffer, privateKey?: Buffer, publicKey?: Buffer) {
+    constructor(ip: string, port: number, useSSL:boolean=false, rootCerts?: Buffer, privateKey?: Buffer, publicKey?: Buffer) {
         super(
             new GrpcTransport({
                 host: `${ip}:${port}`,
                 channelCredentials:
-                    !rootCerts || !privateKey || !publicKey
+                    !useSSL && !rootCerts && !privateKey && !publicKey
                         ? GRPC.ChannelCredentials.createInsecure()
-                        : GRPC.ChannelCredentials.createSsl(rootCerts, privateKey, publicKey),
+                        : GRPC.ChannelCredentials.createSsl(rootCerts || null, privateKey || null, publicKey||null),
             })
         );
+        if( !(!useSSL && !rootCerts && !privateKey && !publicKey)){
+            console.log("using ssl");
+        }
     }
 
     async rS<T extends object>(
