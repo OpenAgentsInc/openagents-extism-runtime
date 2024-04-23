@@ -30,9 +30,13 @@ export default class BlobHostFunctions extends HostFunctionsNamespace {
                 return cp.store(url);
             }
         );
-        this.registerFunction("open", async (mng, pluginPath, pluginId, currentJobId, cp, urlOff: bigint) => {
+        this.registerFunction("open", async (mng, pluginPath, pluginId, currentJobId, cp, urlOff: bigint, encryptionKeyOff: bigint) => {
             const url = cp.read(urlOff).text();
-            const res = await client.r(client.openDisk({ url }));
+            const encryptionKey = cp.read(encryptionKeyOff).text();
+            const res = await client.r(client.openDisk({ 
+                url: url ,
+                encryptionKey: encryptionKey
+            }));
             return cp.store(res.diskId);
         });
         this.registerFunction(
@@ -82,104 +86,5 @@ export default class BlobHostFunctions extends HostFunctionsNamespace {
 
         
 
-        this.registerFunction(
-            "newInputEventRef",
-            async (mng, pluginPath, pluginId,_, cp, eventIdOff: bigint, markerOff: bigint, sourceOff: bigint) => {
-                const ref = cp.read(eventIdOff).text();
-                const marker = cp.read(markerOff).text();
-                const source = cp.read(sourceOff).text();
-                const input: JobInput = {
-                    ref: ref,
-                    type: "event",
-                    marker,
-                    source,
-                };
-                const inputStr = JSON.stringify(input);
-                return cp.store(inputStr);
-            }
-        );
-        this.registerFunction(
-            "newInputJobRef",
-            async (
-                mng,
-                pluginPath,
-                pluginId,
-                _,
-                cp,
-                jobIdOff: bigint,
-                markerOff: bigint,
-                sourceOff: bigint
-            ) => {
-                const ref = cp.read(jobIdOff).text();
-                const marker = cp.read(markerOff).text();
-                const source = cp.read(sourceOff).text();
-                const input: JobInput = {
-                    ref: ref,
-                    type: "data",
-                    marker,
-                    source,
-                };
-                const inputStr = JSON.stringify(input);
-                return cp.store(inputStr);
-            }
-        );
-        this.registerFunction(
-            "newInputData",
-            async (mng, pluginPath, pluginId, _, cp, dataOff: bigint, markerOff: bigint) => {
-                const data = cp.read(dataOff).text();
-                const marker = cp.read(markerOff).text();
-                const input: JobInput = {
-                    data,
-                    type: "text",
-                    marker,
-                };
-                const inputStr = JSON.stringify(input);
-                return cp.store(inputStr);
-            }
-        );
-        this.registerFunction(
-            "newParam",
-            async (mng, pluginPath, pluginId, _, cp, keyOff: bigint, valuesJsonOffset: bigint) => {
-                const key = cp.read(keyOff).text();
-                const values = cp.read(valuesJsonOffset).json();
-                const param: JobParam = {
-                    key,
-                    value: values,
-                };
-                const paramStr = JSON.stringify(param);
-                return cp.store(paramStr);
-            }
-        );
-        this.registerFunction("waitFor", async (mng, pluginPath, pluginId, _, cp, jobIdOff: bigint) => {
-            const jobId = cp.read(jobIdOff).text();
-            while (true) {
-                console.log("Check job" + jobId);
-                const res = await client.r(client.isJobDone({ jobId }));
-                console.log("Job done", res);
-                if (res.isDone) {
-                    return BigInt(1);
-                } else {
-                    await new Promise((res) => setTimeout(res, 100));
-                }
-            }
-            return BigInt(0);
-        });
-        this.registerFunction("request", async (mng, pluginPath, pluginId, _, cp, reqOff: bigint) => {
-            const req = cp.read(reqOff).json();
-
-            const res = await client.r(
-                client.requestJob({
-                    runOn: req.runOn,
-                    expireAfter: Number(req.expireAfter),
-                    input: req.inputs,
-                    param: req.params,
-                    description: req.description,
-                    kind: req.kind,
-                    outputFormat: req.outputFormata,
-                })
-            );
-            const jobs: string = JSON.stringify(res);
-            return cp.store(jobs);
-        });
     }
 }
