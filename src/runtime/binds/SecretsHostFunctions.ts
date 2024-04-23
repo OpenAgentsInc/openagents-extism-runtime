@@ -5,7 +5,7 @@ import Secrets from "../Secrets";
 
 export default class SecretHostFunctions extends HostFunctionsNamespace {
     constructor(secrets: Secrets) {
-        super("Secret");
+        super("Secrets");
         this.registerFunction("get", async (mng, pluginPath, pluginId, jobId, cp, eventOff: bigint) => {
             const key = cp.read(eventOff).text();
             let ns = secrets.namespace(pluginPath);
