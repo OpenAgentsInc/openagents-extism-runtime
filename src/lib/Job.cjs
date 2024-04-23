@@ -17,7 +17,7 @@ class Job {
      * @param {string} message 
      */
     static async log(tx) {
-        console.log(tx);
+        
         const mem = Memory.fromString(tx);
         await Job_log(mem.offset);
     }
@@ -87,11 +87,14 @@ class Job {
      * @param {string} marker Optional marker for the input
      * @returns {object} The input
      */
-    static async newInputData(data, marker) {
+    static async newInputData(data, type = "text", marker = "", source = "") {
         if (!marker) marker = "";
+        if (typeof data !== "string") data = data.toString();
         const memData = Memory.fromString(data);
         const memMarker = Memory.fromString(marker);
-        const respOffset = await Job_newInputData(memData.offset, memMarker.offset);
+        const memType = Memory.fromString(type);
+        const memSource = Memory.fromString(source);
+        const respOffset = await Job_newInputData(memData.offset, memType.offset, memMarker.offset, memSource.offset);
         return Memory.find(respOffset).readJsonObject();
     }
 
@@ -102,7 +105,8 @@ class Job {
      * @param  {...any} values  The values of the param
      * @returns {object} The param
      */
-    static async newParam(name, ...values) {
+    static async newParam(name, values) {
+        if (!Array.isArray(values)) values = [values];
         const valuesJson = JSON.stringify(values);
         const memName = Memory.fromString(name);
         const memValues = Memory.fromString(valuesJson)
@@ -131,9 +135,15 @@ class Job {
     static async request(req) {
         const memReq = Memory.fromString(JSON.stringify(req));
         const respOffset = await Job_request(memReq.offset);
-        return Memory.find(respOffset).readJsonObject();
+        const data = Memory.find(respOffset).readJsonObject();
+        return data.id;
     }
 
+    static async waitForContent(jobId) {
+        const job = await Job.waitFor(jobId);
+        const content = job.result.content;
+        return content;
+    }
 
     static async waitFor(jobId) {
         jobId = await jobId;
@@ -146,7 +156,7 @@ class Job {
     static async pluginRequest(plugin, inputData, description, expireAfter) {
         const req = {
             runOn: "openagents/extism-runtime",
-            expireAfter: expireAfter ||  1000 * 60 * 60,
+            expireAfter: expireAfter || 1000 * 60 * 60,
             description: description || "",
             inputs: [
                 await Job.newInputData(JSON.stringify(inputData))
