@@ -10,6 +10,7 @@ import PoolConnectorClient from "./PoolConnectorClient";
 import Announcer from "./Announcer";
 import Secrets from "./Secrets";
 import SecretHostFunctions from "./binds/SecretsHostFunctions";
+import BlobHostFunctions from "./binds/BlobHostFunctions";
 async function main(){
     const IP = process.env.POOL_ADDRESS || "127.0.0.1";
     const PORT = Number(process.env.POOL_PORT || 5000);
@@ -47,6 +48,7 @@ async function main(){
     jobManager.registerNamespace(new JobHostFunctions(poolConnector));
     jobManager.registerNamespace(new NostrHostFunctions(poolConnector));    
     jobManager.registerNamespace(new SecretHostFunctions(secrets));    
+    jobManager.registerNamespace(new BlobHostFunctions(poolConnector));    
     await jobManager.start();
 
 
