@@ -1,21 +1,21 @@
 import { HostFunctionsNamespace } from "../HostFunctionsNamespace";
 import NostrConnectorClient from "../PoolConnectorClient";
-import { JobInput,JobParam,JobStatus } from "openagents-grpc-proto";
+import { Job, JobInput,JobParam,JobStatus } from "openagents-grpc-proto";
 export default class JobHostFunctions extends HostFunctionsNamespace {
     constructor(client: NostrConnectorClient) {
         super("Job");
-        this.registerFunction("log", async (mng, pluginPath, pluginId, jobId, cp, offs: bigint) => {
+        this.registerFunction("log", async (mng, pluginPath, pluginId, currentJob: Job, cp, offs: bigint) => {
             const log = cp.read(offs).text();
-            console.log(pluginId,":", log);
-            client.logForJob({ jobId: jobId, log });
+            console.log(pluginId, ":", log);
+            client.logForJob({ jobId: currentJob.id, log });
         });
-        this.registerFunction("get", async (mng, pluginPath, pluginId, currentJobId, cp, offs: bigint) => {
-            const jobId = cp.read(offs).text() || currentJobId;
+        this.registerFunction("get", async (mng, pluginPath, pluginId, currentJob, cp, offs: bigint) => {
+            const jobId = cp.read(offs).text() || currentJob.id;
             const res = await client.r(client.getJob({ jobId }));
             const job: string = JSON.stringify(res);
             return cp.store(job);
         });
-        this.registerFunction("isDone", async (mng, pluginPath, pluginId, currentJobId, cp, offs: bigint) => {
+        this.registerFunction("isDone", async (mng, pluginPath, pluginId, currentJob, cp, offs: bigint) => {
             const jobId = cp.read(offs).text();
             const res = await client.r(client.isJobDone({ jobId }));
             return res.isDone ? BigInt(1) : BigInt(0);
@@ -26,7 +26,7 @@ export default class JobHostFunctions extends HostFunctionsNamespace {
                 mng,
                 pluginPath,
                 pluginId,
-                _,
+                currentJob,
                 cp,
                 eventIdOff: bigint,
                 markerOff: bigint,
@@ -51,7 +51,7 @@ export default class JobHostFunctions extends HostFunctionsNamespace {
                 mng,
                 pluginPath,
                 pluginId,
-                _,
+                currentJob,
                 cp,
                 jobIdOff: bigint,
                 markerOff: bigint,
@@ -72,7 +72,17 @@ export default class JobHostFunctions extends HostFunctionsNamespace {
         );
         this.registerFunction(
             "newInputData",
-            async (mng, pluginPath, pluginId, _, cp, dataOff: bigint, typeOff: bigint, markerOff: bigint, relayOff: bigint) => {
+            async (
+                mng,
+                pluginPath,
+                pluginId,
+                currentJob,
+                cp,
+                dataOff: bigint,
+                typeOff: bigint,
+                markerOff: bigint,
+                relayOff: bigint
+            ) => {
                 const data = cp.read(dataOff).text();
                 const marker = cp.read(markerOff).text();
                 const type = cp.read(typeOff).text();
@@ -81,7 +91,7 @@ export default class JobHostFunctions extends HostFunctionsNamespace {
                     data,
                     type,
                     marker,
-                    source
+                    source,
                 };
                 const inputStr = JSON.stringify(input);
                 return cp.store(inputStr);
@@ -89,7 +99,7 @@ export default class JobHostFunctions extends HostFunctionsNamespace {
         );
         this.registerFunction(
             "newParam",
-            async (mng, pluginPath, pluginId, _, cp, keyOff: bigint, valuesJsonOffset: bigint) => {
+            async (mng, pluginPath, pluginId, currentJob, cp, keyOff: bigint, valuesJsonOffset: bigint) => {
                 const key = cp.read(keyOff).text();
                 const values = cp.read(valuesJsonOffset).json();
                 const param: JobParam = {
@@ -100,58 +110,29 @@ export default class JobHostFunctions extends HostFunctionsNamespace {
                 return cp.store(paramStr);
             }
         );
-                // this.registerFunction(
-                //     "waitFor",
-                //     async (mng, pluginPath, pluginId, _, cp, jobIdOff: bigint, logPassthroughBI: bigint) => {
-                //         const jobId = cp.read(jobIdOff).text();
-                //         while (true) {
-                //             try{
-                //                 console.log("Check job" + jobId);
-                //                 const res = await client.r(client.isJobDone({ jobId }));
-                //                 console.log("Job done", res);
-                //                 if (res.isDone) {
-                //                     return BigInt(1);
-                //                 } else {
-                //                     await new Promise((res) => setTimeout(res, 100));
-                //                 }
-                //             }catch(e){
-                //                 console.error(e);
-                //             }
-                //         }
-                //         return BigInt(0);
-                //     }
-                // );
+
 
         this.registerFunction(
             "waitFor",
-            async (
-                mng,
-                pluginPath,
-                pluginId,
-                currentJobId,
-                cp,
-                jobIdOff: bigint,
-            ) => {
-                const jobId = cp.read(jobIdOff).text();
+            async (mng, pluginPath, pluginId, currentJob, cp, jobIdOff: bigint) => {
+                const jobId = cp.read(jobIdOff).text() ;
                 const logPassthrough = true;
                 let lastLog = 0;
                 while (true) {
                     try {
-                        const job = await client.r(client.getJob({ jobId , wait: 1000}));
+                        const job = await client.r(client.getJob({ jobId, wait: 1000 }));
                         if (job) {
+                             if (logPassthrough) {
+                                 for (const log of job.state.logs) {
+                                     if (log.timestamp > lastLog) {
+                                         console.log(pluginId, ":", log.log);
+                                         client.logForJob({ jobId: currentJob.id, log: log.log });
+                                         lastLog = log.timestamp;
+                                     }
+                                 }
+                             }
                             if (job.state.status == JobStatus.SUCCESS && job.result.timestamp) {
                                 return BigInt(1);
-                            } else {
-                            
-                                if (logPassthrough) {
-                                    for (const log of job.state.logs) {
-                                        if (log.timestamp > lastLog) {
-                                            console.log(pluginId, ":", log);
-                                            client.logForJob({ jobId: currentJobId, log: log.log });
-                                            lastLog = log.timestamp;
-                                        }
-                                    }
-                                }
                             }
                         }
                     } catch (e) {
@@ -162,25 +143,53 @@ export default class JobHostFunctions extends HostFunctionsNamespace {
                 return BigInt(0);
             }
         );
-        this.registerFunction("request", async (mng, pluginPath, pluginId, _, cp, reqOff: bigint) => {
-            const r = cp.read(reqOff).text();
-            let req=JSON.parse(r);
-            req = {
-                runOn: req.runOn,
-                expireAfter: Number(req.expireAfter) || 0,
-                input: req.inputs || [],
-                param: req.params || [],
-                description: req.description || "",
-                kind: req.kind || 5003,
-                outputFormat: req.outputFormat || "application/json",
-            };
-            // console.log("Request job", req)
-            const res = await client.r(
-                client.requestJob(req)
-            );
-            const jobs: string = JSON.stringify(res);
-            return cp.store(jobs);
-        });
+        
+        this.registerFunction(
+            "subrequest",
+            async (mng, pluginPath, pluginId, currentJob, cp, reqOff: bigint) => {
+                const r = cp.read(reqOff).text();
+                let req = JSON.parse(r);
+                req = {
+                    runOn: req.runOn,
+                    expireAfter: Number(req.expireAfter) || 0,
+                    input: req.inputs || [],
+                    param: req.params || [],
+                    description: req.description || "",
+                    kind: req.kind || 5003,
+                    outputFormat: req.outputFormat || "application/json",
+                    requestProvider: currentJob.provider || undefined,
+                    encrypted: currentJob.encrypted || false,
+                };
+                // console.log("Request job", req)
+                const res = await client.r(client.requestJob(req));
+                console.log("Received",res);
+                const jobs: string = JSON.stringify(res);
+                return cp.store(jobs);
+            }
+        );
+
+        this.registerFunction(
+            "request",
+            async (mng, pluginPath, pluginId, currentJob, cp, reqOff: bigint) => {
+                const r = cp.read(reqOff).text();
+                let req = JSON.parse(r);
+                req = {
+                    runOn: req.runOn,
+                    expireAfter: Number(req.expireAfter) || 0,
+                    input: req.inputs || [],
+                    param: req.params || [],
+                    description: req.description || "",
+                    kind: req.kind || 5003,
+                    outputFormat: req.outputFormat || "application/json",
+                    requestProvider: req.requestProvider || undefined,
+                    encrypted: req.encrypted || false,
+                };
+                // console.log("Request job", req)
+                const res = await client.r(client.requestJob(req));
+                const jobs: string = JSON.stringify(res);
+                return cp.store(jobs);
+            }
+        );
 
     }
    

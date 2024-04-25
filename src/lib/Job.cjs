@@ -7,6 +7,7 @@ const {
     Job_newInputData,
     Job_newParam,
     Job_request,
+    Job_subrequest,
     Job_waitFor
 } = Host.getFunctions()
 
@@ -17,7 +18,6 @@ class Job {
      * @param {string} message 
      */
     static async log(tx) {
-        
         const mem = Memory.fromString(tx);
         await Job_log(mem.offset);
     }
@@ -138,6 +138,14 @@ class Job {
         const data = Memory.find(respOffset).readJsonObject();
         return data.id;
     }
+
+    static async subrequest(req) {
+        const memReq = Memory.fromString(JSON.stringify(req));
+        const respOffset = await Job_subrequest(memReq.offset);
+        const data = Memory.find(respOffset).readJsonObject();
+        return data.id;
+    }
+
 
     static async waitForContent(jobId) {
         const job = await Job.waitFor(jobId);

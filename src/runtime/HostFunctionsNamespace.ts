@@ -1,5 +1,6 @@
 import { CurrentPlugin } from "@extism/extism";
 import JobManager from "./JobManager";
+import { Job } from "openagents-grpc-proto";
 
 export type ExtismFunction = (callContext: CurrentPlugin, ...args: any[]) => any;
 
@@ -7,7 +8,7 @@ export type HostFunction = (
     mng: JobManager,
     pluginPath: string,
     pluginId:string,
-    jobId: string,
+    currentJob: Job,
     callContext: CurrentPlugin,
     ...args: any[]
 ) => any;
@@ -25,14 +26,14 @@ export class HostFunctionsNamespace {
     }
 
 
-    getHostFunctions(mng: JobManager, jobId: string, pluginPath:string, pluginId: string): { [key: string]: ExtismFunction } {
+    getHostFunctions(mng: JobManager, currentJob: Job, pluginPath:string, pluginId: string): { [key: string]: ExtismFunction } {
         const extismHostFunctions: {
             [key: string]: ExtismFunction;
         } = {};
 
         for (const [name, func] of this.functions) {
             extismHostFunctions[name] = (callContext: CurrentPlugin, ...args: any[]) => {
-                return func(mng, pluginPath,pluginId, jobId, callContext, ...args);
+                return func(mng, pluginPath, pluginId, currentJob, callContext, ...args);
             };
         }
 

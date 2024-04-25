@@ -43,25 +43,26 @@ export default class JobManager {
 
     async _startPendingJobs() {
         try {
-            
+            this.failedJobs = this.failedJobs.filter(
+                (fj) => Date.now() - fj.time < 1000 * 60 * 5
+            );
+
             const pendingJobs: PendingJobs = (
                 await this.conn.getPendingJobs({
                     filterByRunOn: "openagents/extism-runtime",
-                    wait: 60000
+                    wait: 60000,
+                    excludeId: this.failedJobs.map((j) => j.jobId),
                 })
             ).response;
+
             if (pendingJobs.jobs.length > 0) {
                 console.log(pendingJobs.jobs.length, "jobs to start");
             }else{
                 console.log("No jobs to start");
             }
-            this.failedJobs = this.failedJobs.filter((fj) => Date.now() - fj.time < 1000 * 60 * 5);
+            
             for (const job of pendingJobs.jobs) {
-                try {
-                    if (this.failedJobs.find((fj) => fj.jobId == job.id)) {
-                        // console.log("Skipping failed job", job.id);
-                        continue;
-                    }
+                try {                
                     const inputs: JobInput[] = job.input;
                     const input = inputs[0];
 
@@ -77,7 +78,7 @@ export default class JobManager {
                     for (const namespace of this.hostNamespaces) {
                         const functions: { [key: string]: ExtismFunction } = namespace.getHostFunctions(
                             this,
-                            job.id,
+                            job,
                             pluginMain,
                             pluginMainSHAHash
                         );

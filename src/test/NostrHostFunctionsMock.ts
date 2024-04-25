@@ -5,7 +5,7 @@ export default class NostrHostFunctionsMock extends MockFunctions {
         super("Nostr");
         this.registerFunction(
             "sendSignedEvent",
-            async (mng, pluginPath, pluginId, jobId, cp, eventOff: bigint) => {
+            async (mng, pluginPath, pluginId, currentJob, cp, eventOff: bigint) => {
                 const event = cp.read(eventOff).text();
                 // console.info("sendSignedEvent", event);
                 this.record("sendSignedEvent", { event });
@@ -14,7 +14,7 @@ export default class NostrHostFunctionsMock extends MockFunctions {
         );
         this.registerFunction(
             "subscribeToEvents",
-            async (mng, pluginPath, pluginId, jobId, cp, filtersJsonOffset: bigint) => {
+            async (mng, pluginPath, pluginId, currentJob, cp, filtersJsonOffset: bigint) => {
                 const filters = cp.read(filtersJsonOffset).json();
                 // console.info("subscribeToEvents", filters);
                 this.record("subscribeToEvents", { filters });
@@ -24,7 +24,7 @@ export default class NostrHostFunctionsMock extends MockFunctions {
 
         this.registerFunction(
             "unsubscribeFromEvents",
-            async (mng, pluginPath, pluginId, jobId, cp, subIdOff: bigint) => {
+            async (mng, pluginPath, pluginId, currentJob, cp, subIdOff: bigint) => {
                 const subscriptionId = cp.read(subIdOff).text();
                 // console.info("unsubscribeFromEvents", subscriptionId);
                 this.record("unsubscribeFromEvents", { subscriptionId });
@@ -34,7 +34,7 @@ export default class NostrHostFunctionsMock extends MockFunctions {
 
         this.registerFunction(
             "getEvents",
-            async (mng, pluginPath, pluginId, jobId, cp, subIdOff: bigint, limit: bigint) => {
+            async (mng, pluginPath, pluginId, currentJob, cp, subIdOff: bigint, limit: bigint) => {
                 const subscriptionId = cp.read(subIdOff).text();
                 // console.info("getEvents", subscriptionId, limit);
                 this.record("getEvents", { subscriptionId, limit });

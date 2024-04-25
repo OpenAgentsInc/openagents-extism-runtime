@@ -6,10 +6,10 @@ export default class NostrHostFunctions extends HostFunctionsNamespace {
         super("Nostr");
         this.registerFunction(
             "sendSignedEvent",
-            async (mng, pluginPath, pluginId, jobId, cp, eventOff: bigint) => {
+            async (mng, pluginPath, pluginId, currentJob, cp, eventOff: bigint) => {
                 const res = await client.r(
                     client.sendSignedEvent({
-                        groupId: jobId,
+                        groupId: currentJob.id,
                         event: cp.read(eventOff).text(),
                     })
                 );
@@ -19,11 +19,11 @@ export default class NostrHostFunctions extends HostFunctionsNamespace {
         );
         this.registerFunction(
             "subscribeToEvents",
-            async (mng, pluginPath, pluginId, jobId, cp, filtersJsonOffset: bigint) => {
+            async (mng, pluginPath, pluginId, currentJob, cp, filtersJsonOffset: bigint) => {
                 const filters = cp.read(filtersJsonOffset).json();
                 const res = await client.r(
                     client.subscribeToEvents({
-                        groupId: jobId,
+                        groupId: currentJob.id,
                         filters,
                     })
                 );
@@ -34,10 +34,10 @@ export default class NostrHostFunctions extends HostFunctionsNamespace {
 
         this.registerFunction(
             "unsubscribeFromEvents",
-            async (mng, pluginPath, pluginId, jobId, cp, subIdOff: bigint) => {
+            async (mng, pluginPath, pluginId, currentJob, cp, subIdOff: bigint) => {
                 const res = await client.r(
                     client.unsubscribeFromEvents({
-                        groupId: jobId,
+                        groupId: currentJob.id,
                         subscriptionId: cp.read(subIdOff).text(),
                     })
                 );
@@ -48,10 +48,10 @@ export default class NostrHostFunctions extends HostFunctionsNamespace {
 
         this.registerFunction(
             "getEvents",
-            async (mng, pluginPath, pluginId, jobId, cp, subIdOff: bigint, limit: bigint) => {
+            async (mng, pluginPath, pluginId, currentJob, cp, subIdOff: bigint, limit: bigint) => {
                 const res = await client.r(
                     client.getEvents({
-                        groupId: jobId,
+                        groupId: currentJob.id,
                         subscriptionId: cp.read(subIdOff).text(),
                         limit: Number(limit),
                     })

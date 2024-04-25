@@ -5,18 +5,18 @@ export default class JobHostFunctions extends MockFunctions {
     constructor(client: NostrConnectorClient) {
         super("Job");
 
-        this.registerFunction("log", async (mng, pluginPath, pluginId, jobId, cp, offs: bigint) => {
+        this.registerFunction("log", async (mng, pluginPath, pluginId, currentJob, cp, offs: bigint) => {
             const log = cp.read(offs).text();
             // console.log("log ", log);
             this.record("log", { log });
         });
-        this.registerFunction("get", async (mng, pluginPath, pluginId, currentJobId, cp, offs: bigint) => {
-            const jobId = cp.read(offs).text() || currentJobId;
+        this.registerFunction("get", async (mng, pluginPath, pluginId, currentJob, cp, offs: bigint) => {
+            const jobId = cp.read(offs).text() || currentJob.id;
             // console.info("get", jobId);
             this.record("get", { jobId });
             return cp.store("{}");
         });
-        this.registerFunction("isDone", async (mng, pluginPath, pluginId, _, cp, offs: bigint) => {
+        this.registerFunction("isDone", async (mng, pluginPath, pluginId, currentJob, cp, offs: bigint) => {
             const jobId = cp.read(offs).text();
             // console.info("isDone", jobId);
             this.record("isDone", { jobId });
@@ -28,7 +28,7 @@ export default class JobHostFunctions extends MockFunctions {
                 mng,
                 pluginPath,
                 pluginId,
-                _,
+                currentJob,
                 cp,
                 eventIdOff: bigint,
                 markerOff: bigint,
@@ -48,7 +48,7 @@ export default class JobHostFunctions extends MockFunctions {
                 mng,
                 pluginPath,
                 pluginId,
-                _,
+                currentJob,
                 cp,
                 jobIdOff: bigint,
                 markerOff: bigint,
@@ -64,7 +64,7 @@ export default class JobHostFunctions extends MockFunctions {
         );
         this.registerFunction(
             "newInputData",
-            async (mng, pluginPath, pluginId, _, cp, dataOff: bigint, markerOff: bigint) => {
+            async (mng, pluginPath, pluginId, currentJob, cp, dataOff: bigint, markerOff: bigint) => {
                 const data = cp.read(dataOff).text();
                 const marker = cp.read(markerOff).text();
                 // console.info("newInputData", data, marker);
@@ -74,7 +74,7 @@ export default class JobHostFunctions extends MockFunctions {
         );
         this.registerFunction(
             "newParam",
-            async (mng, pluginPath, pluginId, _, cp, keyOff: bigint, valuesJsonOffset: bigint) => {
+            async (mng, pluginPath, pluginId, currentJob, cp, keyOff: bigint, valuesJsonOffset: bigint) => {
                 const key = cp.read(keyOff).text();
                 const values = cp.read(valuesJsonOffset).text();
                 // console.info("newParam", key, values);
@@ -82,11 +82,14 @@ export default class JobHostFunctions extends MockFunctions {
                 return cp.store("{}");
             }
         );
-        this.registerFunction("request", async (mng, pluginPath, pluginId, _, cp, reqOff: bigint) => {
-            const req = cp.read(reqOff).json();
-            this.record("request", req);
-            return cp.store("{}");
-        });
+        this.registerFunction(
+            "request",
+            async (mng, pluginPath, pluginId, currentJob, cp, reqOff: bigint) => {
+                const req = cp.read(reqOff).json();
+                this.record("request", req);
+                return cp.store("{}");
+            }
+        );
 
         this.expected = {
             log: {
