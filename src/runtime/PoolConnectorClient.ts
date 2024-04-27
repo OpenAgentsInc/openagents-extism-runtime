@@ -11,7 +11,16 @@ export default class PoolConnectorClient extends _PoolConnectorClient {
                 channelCredentials:
                     !useSSL && !rootCerts && !privateKey && !publicKey
                         ? GRPC.ChannelCredentials.createInsecure()
-                        : GRPC.ChannelCredentials.createSsl(rootCerts || null, privateKey || null, publicKey||null),
+                        : GRPC.ChannelCredentials.createSsl(
+                              rootCerts || null,
+                              privateKey || null,
+                              publicKey || null
+                          ),
+                clientOptions: {
+                    // 20 MB
+                    "grpc.max_send_message_length": 20 * 1024 * 1024,
+                    "grpc.max_receive_message_length": 20 * 1024 * 1024,
+                },
             })
         );
         if( !(!useSSL && !rootCerts && !privateKey && !publicKey)){
