@@ -40,6 +40,7 @@ async function main(){
     }
 
     const poolConnector = new PoolConnectorClient(IP, PORT, POOL_SSL, CA_CRT, CLIENT_KEY, CLIENT_CRT);
+    await poolConnector.ready()
 
     const announcer = new Announcer(poolConnector, NAME, ICON_URL, DESCRIPTION);
     announcer.start();

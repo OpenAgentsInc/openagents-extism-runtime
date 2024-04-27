@@ -162,7 +162,7 @@ export default class JobHostFunctions extends HostFunctionsNamespace {
                 };
                 // console.log("Request job", req)
                 const res = await client.r(client.requestJob(req));
-                console.log("Received",res);
+                
                 const jobs: string = JSON.stringify(res);
                 return cp.store(jobs);
             }

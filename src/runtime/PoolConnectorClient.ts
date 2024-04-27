@@ -28,6 +28,12 @@ export default class PoolConnectorClient extends _PoolConnectorClient {
         }
     }
 
+
+    async ready(){
+        // TODO
+    }
+   
+
     async rS<T extends object>(
         c: ServerStreamingCall<object, T> 
     ): Promise<RpcOutputStream<T>> {
