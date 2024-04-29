@@ -15,7 +15,7 @@
   "dependencies": {
     "@extism/extism": "^1.0.2",
     "@grpc/grpc-js": "^1.10.4",
-    "@grpc/proto-loader": "^0.7.11",
+    "@grpc/proto-loader": "^0.7.12",
     "@protobuf-ts/grpc-backend": "^2.9.4",
     "@protobuf-ts/grpc-transport": "^2.9.4",
     "@protobuf-ts/plugin": "^2.9.4",
