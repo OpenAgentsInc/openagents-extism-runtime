@@ -26,7 +26,9 @@ async function main(){
     const CLIENT_KEY: Buffer | undefined =
         CLIENT_KEY_PATH && Fs.existsSync(CLIENT_KEY_PATH) ? Fs.readFileSync(CLIENT_KEY_PATH) : undefined;
 
-    const SECRETS_PROVIDERS: string[] = process.env.SECRETS_PROVIDERS ? process.env.SECRETS_PROVIDERS.split(",") : ["./data/secrets.json"];
+    const SECRETS_PROVIDERS: string[] = process.env.EXTISM_RUNTIME_SECRETS_PROVIDERS
+        ? process.env.EXTISM_RUNTIME_SECRETS_PROVIDERS.split(",")
+        : ["./data/secrets.json"];
     
 
     const ICON_URL = process.env.ICON_URL || "";
