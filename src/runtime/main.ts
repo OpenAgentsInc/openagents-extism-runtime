@@ -35,13 +35,15 @@ async function main(){
     const NAME = process.env.NAME || "Extism Plugin Runner Node";
     const DESCRIPTION = process.env.DESCRIPTION || "A node that runs extism plugins";
 
+    const NODE_TOKEN = process.env.NODE_TOKEN || "";
+
 
     const secrets = new Secrets();
     for (const provider of SECRETS_PROVIDERS) {
         secrets.addProvider(provider);
     }
 
-    const poolConnector = new PoolConnectorClient(IP, PORT, POOL_SSL, CA_CRT, CLIENT_KEY, CLIENT_CRT);
+    const poolConnector = new PoolConnectorClient(IP, PORT, POOL_SSL, CA_CRT, CLIENT_KEY, CLIENT_CRT, NODE_TOKEN);
     await poolConnector.ready()
 
     const announcer = new Announcer(poolConnector, NAME, ICON_URL, DESCRIPTION);

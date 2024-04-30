@@ -71,7 +71,6 @@ export default class Announcer {
     }
 
     async start() {
-        console.log("Starting job manager");
         await this._loop();
     }
 

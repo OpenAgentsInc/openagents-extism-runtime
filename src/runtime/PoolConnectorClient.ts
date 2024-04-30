@@ -1,10 +1,10 @@
 import { PoolConnectorClient as _PoolConnectorClient } from "openagents-grpc-proto";
 import * as GRPC from "@grpc/grpc-js";
 import { GrpcTransport } from "@protobuf-ts/grpc-transport";
-import type { UnaryCall,RpcOutputStream, ServerStreamingCall } from "@protobuf-ts/runtime-rpc";
+import type { UnaryCall, RpcOutputStream, ServerStreamingCall, RpcOptions } from "@protobuf-ts/runtime-rpc";
 
 export default class PoolConnectorClient extends _PoolConnectorClient {
-    constructor(ip: string, port: number, useSSL:boolean=false, rootCerts?: Buffer, privateKey?: Buffer, publicKey?: Buffer) {
+    constructor(ip: string, port: number, useSSL:boolean=false, rootCerts?: Buffer, privateKey?: Buffer, publicKey?: Buffer, nodeToken?:string) {
         super(
             new GrpcTransport({
                 host: `${ip}:${port}`,
@@ -23,8 +23,28 @@ export default class PoolConnectorClient extends _PoolConnectorClient {
                 },
             })
         );
-        if( !(!useSSL && !rootCerts && !privateKey && !publicKey)){
+        if (!(!useSSL && !rootCerts && !privateKey && !publicKey)) {
             console.log("using ssl");
+        }
+
+        // instrument each function to pass RpcOptions as the last argument
+        const options: RpcOptions = {
+            meta: {
+                authorization: nodeToken,
+            },
+        };
+            const parentPrototype = Object.getPrototypeOf(Object.getPrototypeOf(this));
+
+        for (const key of Object.getOwnPropertyNames(parentPrototype)) {
+            const value = this[key];
+            if (typeof value === "function") {
+                if (key === "constructor" || key === "ready" || key === "r" || key === "rS") continue;
+                const originalContext = this;
+                this[key] = async (...args: any[]) => {
+                    args.push(options);                    
+                    return value.apply(originalContext, args);
+                };
+            }
         }
     }
 
@@ -44,7 +64,7 @@ export default class PoolConnectorClient extends _PoolConnectorClient {
         return c.responses;
     }
 
-    async r<T extends object>(c: UnaryCall<object, T> | Promise<UnaryCall<object, T>>): Promise<T> {
+    async r<T extends object>(c: UnaryCall<object, T> | Promise<UnaryCall<object, T>>): Promise<T> {      
         const cc = await c;
         const rpcStatus = await cc.status;
         if (!(rpcStatus.code.toString() == "0" || rpcStatus.code.toString() == "OK")) {
