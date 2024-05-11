@@ -36,6 +36,6 @@
     "ts-node": "^10.9.2",
     "tsc-alias": "^1.8.8",
     "tsx": "^4.9.3",
-    "typescript": "^5.4.3"
+    "typescript": "^5.4.5"
   }
 }
