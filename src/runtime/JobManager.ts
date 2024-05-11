@@ -22,9 +22,11 @@ export default class JobManager {
     jobs: ExtismJob[] = [];
     hostNamespaces: Array<HostFunctionsNamespace> = [];
     failedJobs: FailedJob[] = [];
+    secrets: Secrets;
 
-    constructor(conn: PoolConnectorClient) {
+    constructor(conn: PoolConnectorClient, secrets: Secrets) {
         this.conn = conn;
+        this.secrets = secrets;
     }
 
     async registerNamespace(namespace: HostFunctionsNamespace) {
@@ -43,9 +45,7 @@ export default class JobManager {
 
     async _startPendingJobs() {
         try {
-            this.failedJobs = this.failedJobs.filter(
-                (fj) => Date.now() - fj.time < 1000 * 60 * 5
-            );
+            this.failedJobs = this.failedJobs.filter((fj) => Date.now() - fj.time < 1000 * 60 * 5);
 
             const pendingJobs: PendingJobs = (
                 await this.conn.getPendingJobs({
@@ -57,20 +57,28 @@ export default class JobManager {
 
             if (pendingJobs.jobs.length > 0) {
                 console.log(pendingJobs.jobs.length, "jobs to start");
-            }else{
+            } else {
                 console.log("No jobs to start");
             }
-            
+
             for (const job of pendingJobs.jobs) {
-                try {                
+                try {
                     const inputs: JobInput[] = job.input;
                     const input = inputs[0];
 
-                    const inputData = input.data;
+                    let inputData = input.data;
                     const pluginMain: string = job.param.find((param) => param.key == "main")?.value[0] || "";
                     const maxExecutionTime = job.maxExecutionTime;
                     const expiration = Math.min(Date.now() + maxExecutionTime, job.expiration);
                     const pluginMainSHAHash = Crypto.createHash("sha256").update(pluginMain).digest("hex");
+
+                    const secrets0 = this.secrets.namespace(pluginMainSHAHash);
+                    const secrets1 = this.secrets.namespace(pluginMain);               
+                    inputData  = inputData.replace(/%secrets.([a-zA-Z0-9_-]+)%/g, (match, secretName) => {
+                        const secretValue = secrets0.get(secretName) || secrets1.get(secretName);
+                        return secretValue || match;
+                    });                    
+
 
                     const mergedHostFunctions: {
                         [key: string]: ExtismFunction;
@@ -164,9 +172,9 @@ export default class JobManager {
             this._loop2();
         }, 10);
     }
-    
+
     async _loop() {
-        await this._loop1();   
-        await this._loop2();   
+        await this._loop1();
+        await this._loop2();
     }
 }

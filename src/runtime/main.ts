@@ -11,6 +11,7 @@ import Announcer from "./Announcer";
 import Secrets from "./Secrets";
 import SecretHostFunctions from "./binds/SecretsHostFunctions";
 import BlobHostFunctions from "./binds/BlobHostFunctions";
+import PluginRepo from "./PluginRepo";
 async function main(){
     const IP = process.env.POOL_ADDRESS || "127.0.0.1";
     const PORT = Number(process.env.POOL_PORT || 5000);
@@ -28,8 +29,11 @@ async function main(){
 
     const SECRETS_PROVIDERS: string[] = process.env.EXTISM_RUNTIME_SECRETS_PROVIDERS
         ? process.env.EXTISM_RUNTIME_SECRETS_PROVIDERS.split(",")
-        : ["./data/secrets.json"];
+        : ["https://raw.githubusercontent.com/OpenAgentsInc/openagents-plugins/master/secrets.json"];
     
+    const PLUGINS_REPO =
+        process.env.PLUGINS_REPO ||
+        "https://raw.githubusercontent.com/OpenAgentsInc/openagents-plugins/master/index.json5";
 
     const ICON_URL = process.env.ICON_URL || "";
     const NAME = process.env.NAME || "Extism Plugin Runner Node";
@@ -43,13 +47,15 @@ async function main(){
         secrets.addProvider(provider);
     }
 
+    const pluginRepo = new PluginRepo(PLUGINS_REPO);
+
     const poolConnector = new PoolConnectorClient(IP, PORT, POOL_SSL, CA_CRT, CLIENT_KEY, CLIENT_CRT, NODE_TOKEN);
     await poolConnector.ready()
 
-    const announcer = new Announcer(poolConnector, NAME, ICON_URL, DESCRIPTION);
+    const announcer = new Announcer(poolConnector, NAME, ICON_URL, DESCRIPTION, pluginRepo);
     announcer.start();
 
-    const jobManager: JobManager = new JobManager(poolConnector);
+    const jobManager: JobManager = new JobManager(poolConnector, secrets);
     jobManager.registerNamespace(new JobHostFunctions(poolConnector));
     jobManager.registerNamespace(new NostrHostFunctions(poolConnector));    
     jobManager.registerNamespace(new SecretHostFunctions(secrets));    

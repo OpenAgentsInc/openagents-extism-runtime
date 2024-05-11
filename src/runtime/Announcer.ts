@@ -1,5 +1,6 @@
 import {  PendingJobs, Job, JobInput } from "openagents-grpc-proto";
 import PoolConnectorClient from "./PoolConnectorClient";
+import PluginRepo from "./PluginRepo";
 
 export default class Announcer {
     conn: PoolConnectorClient;
@@ -57,12 +58,14 @@ export default class Announcer {
     name: string = "";
     description: string = "";
     nextNodeAnnouncementTimestamp: number = 0;
+    private pluginRepo: PluginRepo;
 
-    constructor(conn: PoolConnectorClient, name: string, iconUrl: string, description: string) {
+    constructor(conn: PoolConnectorClient, name: string, iconUrl: string, description: string, pluginRepo: PluginRepo) {
         this.conn = conn;
         this.name = name;
         this.iconUrl = iconUrl;
         this.description = description;
+        this.pluginRepo = pluginRepo;
     }
 
     async stop() {
@@ -99,6 +102,11 @@ export default class Announcer {
                     );
                     const refreshInterval = res.refreshInterval;
                     template.nextAnnounceTimestamp = Date.now() + refreshInterval;
+
+                    for(const announcement of await this.pluginRepo.getAnnouncements()){
+                        console.log("Announcing event template",announcement);
+                        await this.conn.r(this.conn.announceEventTemplate(announcement));
+                    }
                 }
             }
         } catch (e) {

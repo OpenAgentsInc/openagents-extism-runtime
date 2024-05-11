@@ -23,6 +23,7 @@
     "express": "^4.19.2",
     "google-protobuf": "^3.21.2",
     "grpc-tools": "^1.12.4",
+    "json5": "^2.2.3",
     "nostr-tools": "^2.3.2",
     "openagents-grpc-proto": "https://github.com/OpenAgentsInc/openagents-grpc-proto/releases/download/v0.7.6/openagents_grpc_proto-JAVASCRIPT.tgz",
     "ts-protoc-gen": "^0.15.0",
@@ -34,6 +35,7 @@
     "esbuild": "^0.20.2",
     "ts-node": "^10.9.2",
     "tsc-alias": "^1.8.8",
+    "tsx": "^4.9.3",
     "typescript": "^5.4.3"
   }
 }
