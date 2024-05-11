@@ -21,30 +21,13 @@ export default class PoolConnectorClient extends _PoolConnectorClient {
                     "grpc.max_send_message_length": 20 * 1024 * 1024,
                     "grpc.max_receive_message_length": 20 * 1024 * 1024,
                 },
+                meta: {
+                    authorization: nodeToken
+                },
             })
         );
         if (!(!useSSL && !rootCerts && !privateKey && !publicKey)) {
             console.log("using ssl");
-        }
-
-        // instrument each function to pass RpcOptions as the last argument
-        const options: RpcOptions = {
-            meta: {
-                authorization: nodeToken,
-            },
-        };
-            const parentPrototype = Object.getPrototypeOf(Object.getPrototypeOf(this));
-
-        for (const key of Object.getOwnPropertyNames(parentPrototype)) {
-            const value = this[key];
-            if (typeof value === "function") {
-                if (key === "constructor" || key === "ready" || key === "r" || key === "rS") continue;
-                const originalContext = this;
-                this[key] = async (...args: any[]) => {
-                    args.push(options);                    
-                    return value.apply(originalContext, args);
-                };
-            }
         }
     }
 
