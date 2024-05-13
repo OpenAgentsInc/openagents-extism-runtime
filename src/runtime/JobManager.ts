@@ -72,13 +72,14 @@ export default class JobManager {
                     const expiration = Math.min(Date.now() + maxExecutionTime, job.expiration);
                     const pluginMainSHAHash = Crypto.createHash("sha256").update(pluginMain).digest("hex");
 
-                    const secrets0 = this.secrets.namespace(pluginMainSHAHash);
-                    const secrets1 = this.secrets.namespace(pluginMain);               
-                    inputData  = inputData.replace(/%secrets.([a-zA-Z0-9_-]+)%/g, (match, secretName) => {
-                        const secretValue = secrets0.get(secretName) || secrets1.get(secretName);
-                        return secretValue || match;
-                    });                    
-
+                    if(this.secrets){
+                        const secrets0 = this.secrets.namespace(pluginMainSHAHash);
+                        const secrets1 = this.secrets.namespace(pluginMain);               
+                        inputData  = inputData.replace(/%secrets.([a-zA-Z0-9_-]+)%/g, (match, secretName) => {
+                            const secretValue = secrets0.get(secretName) || secrets1.get(secretName);
+                            return secretValue || match;
+                        });                    
+                    }
 
                     const mergedHostFunctions: {
                         [key: string]: ExtismFunction;
