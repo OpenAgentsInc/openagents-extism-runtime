@@ -9,10 +9,10 @@ export default class SecretHostFunctions extends HostFunctionsNamespace {
         this.registerFunction("get", async (mng, pluginPath, pluginId, currentJob, cp, eventOff: bigint) => {
             const key = cp.read(eventOff).text();
             let ns = secrets.namespace(pluginPath);
-            let secret = ns ? ns.get(key) : undefined;
+            let secret = ns ? await ns.get(key) : undefined;
             if (!secret) {
                 ns = secrets.namespace(pluginId);
-                secret = ns ? ns.get(key) : undefined;
+                secret = ns ? await ns.get(key) : undefined;
             }
             if (!secret) secret = "";
             return cp.store(secret);
