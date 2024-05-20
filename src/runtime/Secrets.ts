@@ -1,8 +1,29 @@
 
 import Fs from "fs";
+import Crypto from "crypto";
 export class SecretProvider {
-    get(namespace:string, name: string): string {
+    key: string;
+    async get(namespace:string, name: string): Promise<string> {
         throw new Error("Not implemented");
+    }
+    setKey(key: string){
+        this.key = key;
+    }
+    decrypt(data: string): string {
+        if (!this.key||!data.startsWith("enc:")) {
+            return data;
+        }
+        const encryptedData = data.slice(4);
+        const privateKey =  this.key;
+        const buffer = Buffer.from(encryptedData, "base64");
+        const decrypted = Crypto.privateDecrypt(
+            {
+                key: privateKey,
+                padding: Crypto.constants.RSA_PKCS1_PADDING,
+            },
+            buffer
+        );
+        return decrypted.toString("utf8");
     }
 }
 
@@ -13,10 +34,10 @@ export class SecretNamespace {
         this.providers = providers;
         this.namespace = namespace;
     }
-    get(name: string): string {
+    async get(name: string): Promise<string>{
         for (const provider of this.providers){
             try{
-                const s = provider.get(this.namespace, name);
+                const s = await provider.get(this.namespace, name);
                 if (s) return s;
             }catch(e){
                 console.error(e);
@@ -43,9 +64,9 @@ export class HttpSecretProvider extends SecretProvider {
         }
         return this.document;
     }
-    get(namespace:string, name: string): string {
-        const n:{[key:string]:string} = this.getRemote()[namespace];
-        if(n) return n[name];
+    async get(namespace:string, name: string): Promise<string> {
+        const n = (await this.getRemote())[namespace];
+        if(n) return this.decrypt(n[name]);
         return undefined;
     }
 }
@@ -69,15 +90,24 @@ class LocalSecretProvider extends SecretProvider {
         }
         return this.document||{};
     }
-    get(namespace:string, name: string): string {
-        const n:{[key:string]:string} = this.getLocal()[namespace];
-        if(n) return n[name];
+    async get(namespace:string, name: string): Promise<string> {
+        const n  = (await this.getLocal())[namespace];
+        if(n) return this.decrypt(n[name]);
         return undefined;
     }
 }
 
 export default class Secrets {
     providers: SecretProvider[]= [];
+    key: string;
+    constructor(keyPath: string){
+        if(Fs.existsSync(keyPath)){
+            this.key = Fs.readFileSync(keyPath,"utf8");
+        }else{
+            console.warn("Key file not found");
+        }
+    }
+
     namespace(ns: string): SecretNamespace {
         return new SecretNamespace(this.providers, ns);
     }
@@ -94,6 +124,7 @@ export default class Secrets {
         if (typeof provider === "string"){
             provider = this.useBestProvider(provider);
         }
+        provider.setKey(this.key);
         this.providers.push(provider as SecretProvider);
     }
 }

@@ -30,6 +30,8 @@ async function main(){
     const SECRETS_PROVIDERS: string[] = process.env.EXTISM_RUNTIME_SECRETS_PROVIDERS
         ? process.env.EXTISM_RUNTIME_SECRETS_PROVIDERS.split(",")
         : ["https://raw.githubusercontent.com/OpenAgentsInc/openagents-plugins/master/secrets.json"];
+
+    const SECRETS_KEY: string = process.env.EXTISM_RUNTIME_SECRETS_KEY || "./private.pem";
     
     const PLUGINS_REPO =
         process.env.PLUGINS_REPO ||
@@ -42,7 +44,7 @@ async function main(){
     const NODE_TOKEN = process.env.NODE_TOKEN || "";
 
 
-    const secrets = new Secrets();
+    const secrets = new Secrets(SECRETS_KEY);
     for (const provider of SECRETS_PROVIDERS) {
         secrets.addProvider(provider);
     }

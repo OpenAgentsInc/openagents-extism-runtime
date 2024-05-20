@@ -75,10 +75,15 @@ export default class JobManager {
                     if(this.secrets){
                         const secrets0 = this.secrets.namespace(pluginMainSHAHash);
                         const secrets1 = this.secrets.namespace(pluginMain);               
-                        inputData  = inputData.replace(/%secrets.([a-zA-Z0-9_-]+)%/g, (match, secretName) => {
-                            const secretValue = secrets0.get(secretName) || secrets1.get(secretName);
-                            return secretValue || match;
-                        });                    
+                        
+                        const regex = /%secret.([a-zA-Z0-9_-]+)%/g;
+                        let match;
+                        while ((match = regex.exec(inputData)) !== null) {
+                            const secretValue =
+                                (await secrets0.get(match[1])) || (await secrets1.get(match[1]));
+                            inputData = inputData.replace(match[0], secretValue || match[0]);
+                        }
+
                     }
 
                     const mergedHostFunctions: {

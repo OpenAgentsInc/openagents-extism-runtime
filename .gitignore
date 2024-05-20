@@ -9,3 +9,4 @@ src/test/plugin/.hash
 node_modules
 build
 tmp
+private.pem
