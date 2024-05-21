@@ -19,7 +19,7 @@ export class SecretProvider {
         const decrypted = Crypto.privateDecrypt(
             {
                 key: privateKey,
-                padding: Crypto.constants.RSA_PKCS1_PADDING,
+                padding: Crypto.constants.RSA_PKCS1_OAEP_PADDING,
             },
             buffer
         );
