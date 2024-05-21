@@ -82,7 +82,7 @@ export default class ExtismJob {
     }
 
     async _callPlugin(plugin: Extism.Plugin, method: string, jobId?: string, inputData?: string){
-        return this._callPluginMaybe(plugin, method, jobId, inputData, true);
+        return await this._callPluginMaybe(plugin, method, jobId, inputData, true);
     }
     async _callPluginMaybe(
         plugin: Extism.Plugin,
@@ -93,28 +93,33 @@ export default class ExtismJob {
     ): Promise<string | undefined> {
         if (!this.initialized) throw new Error("Not initialized");
         const q=this.executionQueue.then(async () => {
-            const fexists = async (name) => {
-                return await plugin.functionExists(name);
-            };
-            let out: Extism.PluginOutput;
-            if (jobId && (await fexists(method + "ForJob"))) {
-                out = await plugin.call(
-                    method + "ForJob",
-                    JSON.stringify({
-                        jobId: jobId,
-                        args: inputData,
-                    })
-                );
-            } else if (await fexists(method)) {
-                out = await plugin.call(method, inputData);
-            } else {
-                if (required) {
-                    throw new Error("No method " + method + " found in  plugin " + this);
+            try{
+                const fexists = async (name) => {
+                    return await plugin.functionExists(name);
+                };
+                let out: Extism.PluginOutput;
+                if (jobId && (await fexists(method + "ForJob"))) {
+                    out = await plugin.call(
+                        method + "ForJob",
+                        JSON.stringify({
+                            jobId: jobId,
+                            args: inputData,
+                        })
+                    );
+                } else if (await fexists(method)) {
+                    out = await plugin.call(method, inputData);
                 } else {
-                    return "";
+                    if (required) {
+                        throw new Error("No method " + method + " found in  plugin " + this);
+                    } else {
+                        return "";
+                    }
                 }
+                return out?out.text():undefined;
+            }catch(e){
+                console.error("Error calling plugin in execution queue",e);
+                throw e;
             }
-            return out?out.text():undefined;
         });
         
      
@@ -122,19 +127,24 @@ export default class ExtismJob {
         return await q;
     }
 
-    async callPlugin(pluginName: string, input: string): Promise<string | undefined> {
-        if (!this.initialized) throw new Error("Not initialized");
-        for (let i = 0; i < this.dependencies.length; i++) {
-            const fragment = this.dependencies[i];
-            if (!fragment.names.includes(pluginName)) continue;
-            return await this._callPlugin(fragment.plugin, "run", this.jobId, input);
-        }
-        return undefined;
-    }
+    // async callPlugin(pluginName: string, input: string): Promise<string | undefined> {
+    //     if (!this.initialized) throw new Error("Not initialized");
+    //     for (let i = 0; i < this.dependencies.length; i++) {
+    //         const fragment = this.dependencies[i];
+    //         if (!fragment.names.includes(pluginName)) continue;
+    //         return await this._callPlugin(fragment.plugin, "run", this.jobId, input);
+    //     }
+    //     return undefined;
+    // }
 
     async run(inputData: string): Promise<string | undefined> {
         if (!this.initialized) throw new Error("Not initialized");
-        return this._callPlugin(this.main.plugin, "run", this.jobId, inputData);
+        try{
+            return await this._callPlugin(this.main.plugin, "run", this.jobId, inputData);
+        }catch(e){
+            console.error("Error running plugin",e);
+            throw e;
+        }
     }
 
     async loop() {
