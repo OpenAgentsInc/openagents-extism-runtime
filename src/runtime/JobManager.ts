@@ -117,6 +117,7 @@ export default class JobManager {
                                         jobId: job.id,
                                         output,
                                     });
+                                    
                                 })
                                 .catch((e) => {
                                     console.error("Error running job", e);

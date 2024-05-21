@@ -120,6 +120,9 @@ export default class ExtismJob {
                 console.error("Error calling plugin in execution queue",e);
                 throw e;
             }
+        }).catch((e)=>{
+            console.error("Error in execution queue",e);
+            throw e;
         });
         
      
