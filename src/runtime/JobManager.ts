@@ -19,7 +19,7 @@ export default class JobManager {
     conn: PoolConnectorClient;
     loopTimeout: NodeJS.Timeout;
     stopNow: boolean = false;
-    jobs: ExtismJob[] = [];
+    // jobs: ExtismJob[] = [];
     hostNamespaces: Array<HostFunctionsNamespace> = [];
     failedJobs: FailedJob[] = [];
     secrets: Secrets;
@@ -108,7 +108,7 @@ export default class JobManager {
                     plugin
                         .init()
                         .then(() => {
-                            this.jobs.push(plugin);
+                            // this.jobs.push(plugin);
                             plugin
                                 .run(inputData)
                                 .then((output) => {
