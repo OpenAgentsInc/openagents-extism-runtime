@@ -150,30 +150,30 @@ export default class JobManager {
         }
     }
 
-    async _jobsLooping() {
-        for (let i = 0; i < this.jobs.length; i++) {
-            const job = this.jobs[i];
-            try {
-                if (await job.isExpired()) {
-                    job.destroy();
-                    this.jobs.splice(i, 1);
-                    i--;
-                } else {
-                    job.loop();
-                }
-            } catch (e) {
-                console.error("Error looping job", job.jobId, e);
-            }
-        }
-    }
+    // async _jobsLooping() {
+    //     for (let i = 0; i < this.jobs.length; i++) {
+    //         const job = this.jobs[i];
+    //         try {
+    //             if (await job.isExpired()) {
+    //                 job.destroy();
+    //                 this.jobs.splice(i, 1);
+    //                 i--;
+    //             } else {
+    //                 job.loop();
+    //             }
+    //         } catch (e) {
+    //             console.error("Error looping job", job.jobId, e);
+    //         }
+    //     }
+    // }
 
-    async _loop1() {
-        if (this.stopNow) return;
-        await this._jobsLooping();
-        this.loopTimeout = setTimeout(() => {
-            this._loop1();
-        }, 100);
-    }
+    // async _loop1() {
+    //     if (this.stopNow) return;
+    //     await this._jobsLooping();
+    //     this.loopTimeout = setTimeout(() => {
+    //         this._loop1();
+    //     }, 100);
+    // }
 
     async _loop2() {
         if (this.stopNow) return;
@@ -184,7 +184,7 @@ export default class JobManager {
     }
 
     async _loop() {
-        await this._loop1();
+        // await this._loop1();
         await this._loop2();
     }
 }

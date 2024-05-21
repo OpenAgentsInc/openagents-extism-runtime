@@ -155,19 +155,19 @@ export default class ExtismJob {
         }
     }
 
-    async loop() {
-        if (!this.initialized) throw new Error("Not initialized");
+    // async loop() {
+        // if (!this.initialized) throw new Error("Not initialized");
           
-        if (this.looping) return;
-        this.looping = true;
-        await this._callPluginMaybe(this.main.plugin, "loop", this.jobId, "{}")
-            .finally(() => {
-                this.looping = false;
-            })
-            .catch((e) => {
-                console.error(e);
-            });
-    }
+        // if (this.looping) return;
+        // this.looping = true;
+        // await this._callPluginMaybe(this.main.plugin, "loop", this.jobId, "{}")
+        //     .finally(() => {
+        //         this.looping = false;
+        //     })
+        //     .catch((e) => {
+        //         console.error(e);
+        //     });
+    // }
 
     async destroy() {
         if (!this.initialized) return;
