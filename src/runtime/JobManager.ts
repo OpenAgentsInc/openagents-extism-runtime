@@ -117,7 +117,7 @@ export default class JobManager {
                                         jobId: job.id,
                                         output,
                                     });
-                                    
+                                    plugin.destroy();
                                 })
                                 .catch((e) => {
                                     console.error("Error running job", e);
@@ -125,6 +125,7 @@ export default class JobManager {
                                         jobId: job.id,
                                         reason: e.toString(),
                                     });
+                                    plugin.destroy();
                                 });
                         })
                         .catch((e) => {
@@ -133,7 +134,9 @@ export default class JobManager {
                                 jobId: job.id,
                                 reason: e.toString(),
                             });
+                            plugin.destroy();
                         });
+                
                 } catch (e) {
                     console.error("Error starting job", job.id, e);
                     this.failedJobs.push({

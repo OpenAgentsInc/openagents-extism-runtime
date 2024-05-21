@@ -33,6 +33,11 @@ export default class ExtismJob {
         this.expiration = expiration;
         this.jobId = jobId;
         this.hostFunctions = hostFunctions;
+
+        // autodestruct
+        setTimeout(async () => {
+            await this.destroy();
+        },1000*60*5);
     }
 
     async init() {
@@ -165,7 +170,8 @@ export default class ExtismJob {
     }
 
     async destroy() {
-        if (!this.initialized) throw new Error("Not initialized");
+        if (!this.initialized) return;
+        this.initialized = false;
         for (const plugin of [this.main, ...this.dependencies]) {
             try {
                 await this._callPluginMaybe(plugin.plugin, "destroy").catch((e) => {
