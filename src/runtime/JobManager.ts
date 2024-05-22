@@ -134,6 +134,10 @@ export default class JobManager {
                                 jobId: job.id,
                                 reason: e.toString(),
                             });
+                             this.failedJobs.push({
+                                 jobId: job.id,
+                                 time: Date.now(),
+                             });
                             plugin.destroy();
                         });
                 

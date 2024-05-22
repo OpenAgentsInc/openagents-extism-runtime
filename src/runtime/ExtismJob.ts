@@ -169,9 +169,10 @@ export default class ExtismJob {
         //     });
     // }
 
+    private destructing: boolean = false;
     async destroy() {
-        if (!this.initialized) return;
-        this.initialized = false;
+        if (!this.initialized || this.destructing) return;
+        this.destructing = true;
         for (const plugin of [this.main, ...this.dependencies]) {
             try {
                 await this._callPluginMaybe(plugin.plugin, "destroy").catch((e) => {
@@ -188,5 +189,7 @@ export default class ExtismJob {
                 console.log("Error closing plugin", e);
             }
         }
+        this.initialized = false;
+        this.destructing = false;
     }
 }
