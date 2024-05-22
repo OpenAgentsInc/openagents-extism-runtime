@@ -63,7 +63,10 @@ export default  class PluginRepo{
         const announcements=[];
         for(const plugin of this.plugins){
             try{
-                let template=plugin.template;
+                const enabled = plugin.enabled;
+                if(typeof enabled!="undefined" && !enabled) continue;
+                
+                let template=plugin.template;                
                 const sockets = plugin.sockets;
                 const meta = plugin.meta;
                 if(plugin["mini-template"]){
