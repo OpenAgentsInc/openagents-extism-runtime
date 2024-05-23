@@ -24,7 +24,7 @@
     "google-protobuf": "^3.21.2",
     "grpc-tools": "^1.12.4",
     "json5": "^2.2.3",
-    "nostr-tools": "^2.3.2",
+    "nostr-tools": "^2.5.2",
     "openagents-grpc-proto": "https://github.com/OpenAgentsInc/openagents-grpc-proto/releases/download/v0.9/openagents_grpc_proto-JAVASCRIPT.tgz",
     "ts-protoc-gen": "^0.15.0",
     "uuidv4": "^6.2.13",
