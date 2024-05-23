@@ -150,9 +150,11 @@ class Job {
     static async waitForContents(jobId) {
         const job = await Job.waitFor(jobId);
         const choices=[];
-        for (const state of job.results) {
-            if (state.status == 3) {
-                choices.push(state);
+        if (job){
+            for (const state of job.results) {
+                if (state.status == 3) {
+                    choices.push(state);
+                }
             }
         }
         // deduplicate ?
@@ -161,9 +163,11 @@ class Job {
 
     static async waitForContent(jobId) {
         const job = await Job.waitFor(jobId);
-        for(const state of job.results){
-            if (state.status == 3){
-                return state.result.content;
+        if (job){
+            for(const state of job.results){
+                if (state.status == 3){
+                    return state.result.content;
+                }
             }
         }
         throw new Error("No content found");
