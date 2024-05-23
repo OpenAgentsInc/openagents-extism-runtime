@@ -50,7 +50,6 @@ class Nostr {
      */
     static async getEvents(subId, limit) {
         if (!limit) limit = 0;
-        limit = BigInt(limit);
         const memSubId = Memory.fromString(subId);
         const resOffset = await Nostr_getEvents(memSubId.offset, limit);
         return Memory.find(resOffset).readJsonObject();

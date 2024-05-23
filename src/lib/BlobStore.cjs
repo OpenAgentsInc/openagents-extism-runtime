@@ -16,8 +16,7 @@ class BlobStore {
     static async create(name, encryptionKey = "", includeEncryptionKeyInOutput = false) {
         const nameMem = Memory.fromString(name);
         const encryptionKeyMem = Memory.fromString(encryptionKey);
-        const includeEncryptionKeyInOutput = BigInt(includeEncryptionKeyInOutput ? 1 : 0);
-        const urlOff = await BlobStore_create(nameMem.offset, encryptionKeyMem.offset, includeEncryptionKeyInOutput)
+        const urlOff = await BlobStore_create(nameMem.offset, encryptionKeyMem.offset, includeEncryptionKeyInOutput?1:0)
         return new BlobStore(Memory.find(urlOff).readString());
     }
 

@@ -176,9 +176,7 @@ class Job {
     static async waitFor(jobId, nExpectedResults = 1, maxWaitTime = 1000 *60*2){
         jobId = await jobId;
         const jobIdOff = Memory.fromString(jobId);
-        const nExpectedResultsB=BigInt(nExpectedResults);
-        const maxWaitTimeB=BigInt(maxWaitTime);
-        const res = await Job_waitFor(jobIdOff.offset, nExpectedResultsB, maxWaitTimeB);
+        const res = await Job_waitFor(jobIdOff.offset, nExpectedResults, maxWaitTime);
         if(res == 0){
             throw new Error("Job "+jobId+" failed");
         }
