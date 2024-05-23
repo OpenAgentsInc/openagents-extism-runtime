@@ -114,29 +114,45 @@ export default class JobHostFunctions extends HostFunctionsNamespace {
 
         this.registerFunction(
             "waitFor",
-            async (mng, pluginPath, pluginId, currentJob, cp, jobIdOff: bigint) => {
+            async (mng, pluginPath, pluginId, currentJob, cp, jobIdOff: bigint, nExpectedResultsB: bigint, maxWaitTimeB: bigint) => {
                 const jobId = cp.read(jobIdOff).text() ;
                 const logPassthrough = true;
-                let lastLog = 0;
+                const expectedResults = Number(nExpectedResultsB);
+                const maxWaitTime = Number(maxWaitTimeB);
+
+
+                const trackedLogs = [];
+                
+                let t=Date.now();
                 while (true) {
                     try {
-                        const job = await client.r(client.getJob({ jobId, wait: 1000 }));
+                        const job = await client.r(
+                            client.getJob({ jobId, wait: 1000, nResultsToWait: expectedResults })
+                        );
                         if (job) {
-                             if (logPassthrough) {
-                                 for (const log of job.state.logs) {
-                                     if (log.timestamp > lastLog) {
-                                         console.log(pluginId, ":", log.log);
-                                         client.logForJob({ jobId: currentJob.id, log: log.log });
-                                         lastLog = log.timestamp;
-                                     }
-                                 }
-                             }
-                            if (job.state.status == JobStatus.SUCCESS && job.result.timestamp) {
-                                return BigInt(1);
+                            let successes = 0;
+                            for(const state of job.results){
+                                // propagate logs
+                                if (logPassthrough){
+                                    for (const log of state.logs) {
+                                        if (!trackedLogs.includes(log.id)) {
+                                            trackedLogs.push(log.id);
+                                            console.log(pluginId, ":", log.log);
+                                            client.logForJob({ jobId: currentJob.id, log: log.log });
+                                        }
+                                    }
+                                }
+                                if (state.status == JobStatus.SUCCESS)  successes++;
+                                if(successes >= expectedResults){
+                                    return BigInt(1);
+                                }
                             }
                         }
                     } catch (e) {
                         // console.error(e);
+                    }
+                    if(Date.now()-t>maxWaitTime){
+                        break;
                     }
                     await new Promise((res) => setTimeout(res, 100));
                 }

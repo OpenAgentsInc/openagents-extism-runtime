@@ -1,0 +1,32 @@
+declare module "main" {
+    export function run(): I32;
+}
+
+declare module "extism:host" {
+    interface user {
+        Job_log(ptr: I64): void;
+        Job_get(ptr: I64): I64;
+        Job_isDone(ptr: I64): I64;
+        Job_waitFor(ptr: I64, nExpectedResults: I64, maxWaitTime: I64): I64;
+        Job_newInputEventRef(eventIdPtr: I64, markerPtr: I64, sourceRelayPtr: I64): I64;
+        Job_newInputJobRef(jobIdPtr: I64, markerPtr: I64, sourceRelayPtr: I64): I64;
+        Job_newInputData(dataPtr: I64, typePtr: I64, markerPtr: I64, sourcePtr: I64): I64;
+        Job_newParam(keyPtr: I64, args: I64): I64;
+        Job_request(req: I64): I64;
+        Job_subrequest(req: I64): I64;
+
+        Nostr_sendSignedEvent(eventOff: I64): I64;
+        Nostr_subscribeToEvents(filtersJsonOffset: I64): I64;
+        Nostr_unsubscribeFromEvents(subIdOff: I64): I64;
+        Nostr_getEvents(subIdOff: I64, limit: I64): I64;
+
+        BlobStore_create(name: I64, encryptionKey: I64, includeEncryptionKeyInUrl: I64): I64;
+        BlobStore_open(url: I64, encryptionKey: I64): I64;
+        BlobStore_close(url: I64): I64;
+        BlobStore_write(url: I64, path: I64, data: I64): I64;
+        BlobStore_read(url: I64, path: I64): I64;
+        BlobStore_del(url: I64, path: I64): I64;
+
+        Secrets_get(keyPtr: I64): I64;
+    }
+}
