@@ -117,8 +117,8 @@ export default class JobHostFunctions extends HostFunctionsNamespace {
             async (mng, pluginPath, pluginId, currentJob, cp, jobIdOff: bigint, nExpectedResultsB: bigint, maxWaitTimeB: bigint) => {
                 const jobId = cp.read(jobIdOff).text() ;
                 const logPassthrough = true;
-                const expectedResults = Number(nExpectedResultsB);
-                const maxWaitTime = Number(maxWaitTimeB);
+                const expectedResults = Number(nExpectedResultsB)||1
+                const maxWaitTime = Number(maxWaitTimeB)||1000*60*2;
 
 
                 const trackedLogs = [];
@@ -142,7 +142,7 @@ export default class JobHostFunctions extends HostFunctionsNamespace {
                                         }
                                     }
                                 }
-                                if (state.status == JobStatus.SUCCESS)  successes++;
+                                if (state.status == JobStatus.SUCCESS && state.result.timestamp)  successes++;
                                 if(successes >= expectedResults){
                                     return BigInt(1);
                                 }
