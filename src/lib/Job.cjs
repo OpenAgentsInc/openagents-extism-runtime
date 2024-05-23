@@ -169,7 +169,7 @@ class Job {
         throw new Error("No content found");
     }
 
-    static async waitFor(jobId, nExpectedResults = 1, maxWaitTime = 1000 *60){
+    static async waitFor(jobId, nExpectedResults = 1, maxWaitTime = 1000 *60*2){
         jobId = await jobId;
         const jobIdOff = Memory.fromString(jobId);
         const nExpectedResultsB=BigInt(nExpectedResults);
