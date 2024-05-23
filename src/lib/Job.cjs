@@ -147,8 +147,8 @@ class Job {
     }
 
 
-    static async waitForContents(jobId) {
-        const job = await Job.waitFor(jobId);
+    static async waitForContents(jobId, nExpectedResults = 1, maxWaitTime = 1000 * 60 * 2){
+        const job = await Job.waitFor(jobId, nExpectedResults, maxWaitTime);
         const choices=[];
         if (job){
             for (const state of job.results) {
@@ -161,8 +161,8 @@ class Job {
         return choices;
     }
 
-    static async waitForContent(jobId) {
-        const job = await Job.waitFor(jobId);
+    static async waitForContent(jobId, nExpectedResults = 1, maxWaitTime = 1000 * 60 * 2) {
+        const job = await Job.waitFor(jobId, nExpectedResults, maxWaitTime);
         if (job){
             for(const state of job.results){
                 if (state.status == 3){
