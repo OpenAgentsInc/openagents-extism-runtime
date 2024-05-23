@@ -152,6 +152,7 @@ export default class JobHostFunctions extends HostFunctionsNamespace {
                         // console.error(e);
                     }
                     if(Date.now()-t>maxWaitTime){
+                        console.error("Timeout waiting for job", jobId,maxWaitTime);
                         break;
                     }
                     await new Promise((res) => setTimeout(res, 100));
