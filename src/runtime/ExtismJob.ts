@@ -20,13 +20,15 @@ export default class ExtismJob {
     looping: boolean = false;
     jobId: string;
     hostFunctions: { [key: string]: ExtismFunction };
-    executionQueue: Promise<string|undefined> = Promise.resolve(undefined);
+    executionQueue: Promise<string | undefined> = Promise.resolve(undefined);
+    allowedHosts: string[] = ["*"];
 
     constructor(
         jobId: string,
         mainPluginPath: string,
         expiration: number,
-        hostFunctions: { [key: string]: ExtismFunction }
+        hostFunctions: { [key: string]: ExtismFunction },
+        allowedHosts?: string[] 
     ) {
         // TODO: check origins
         this.mainPluginPath = mainPluginPath;
@@ -34,16 +36,20 @@ export default class ExtismJob {
         this.jobId = jobId;
         this.hostFunctions = hostFunctions;
 
+        if(allowedHosts!==undefined) this.allowedHosts = allowedHosts;        
+
         // autodestruct
-        setTimeout(async () => {
-            await this.destroy();
-        },1000*60*5);
+        setTimeout(
+            async () => {
+                await this.destroy();
+            },
+            1000 * 60 * 5
+        );
     }
 
     async init() {
         if (this.initialized) throw new Error("Already initialized");
         this.main = await this._loadFragment(this.mainPluginPath);
-     
 
         this.initialized = true;
         for (const plugin of [this.main, ...this.dependencies]) {
@@ -64,7 +70,7 @@ export default class ExtismJob {
             functions: {
                 "extism:host/user": this.hostFunctions,
             },
-            allowedHosts:["*"]
+            allowedHosts: this.allowedHosts,
         };
         const plugin = await Extism.createPlugin(path, options);
         let meta: any;
@@ -86,7 +92,7 @@ export default class ExtismJob {
         return fragment;
     }
 
-    async _callPlugin(plugin: Extism.Plugin, method: string, jobId?: string, inputData?: string){
+    async _callPlugin(plugin: Extism.Plugin, method: string, jobId?: string, inputData?: string) {
         return await this._callPluginMaybe(plugin, method, jobId, inputData, true);
     }
     async _callPluginMaybe(
@@ -97,41 +103,42 @@ export default class ExtismJob {
         required?: boolean
     ): Promise<string | undefined> {
         if (!this.initialized) throw new Error("Not initialized");
-        const q=this.executionQueue.then(async () => {
-            try{
-                const fexists = async (name) => {
-                    return await plugin.functionExists(name);
-                };
-                let out: Extism.PluginOutput;
-                if (jobId && (await fexists(method + "ForJob"))) {
-                    out = await plugin.call(
-                        method + "ForJob",
-                        JSON.stringify({
-                            jobId: jobId,
-                            args: inputData,
-                        })
-                    );
-                } else if (await fexists(method)) {
-                    out = await plugin.call(method, inputData);
-                } else {
-                    if (required) {
-                        throw new Error("No method " + method + " found in  plugin " + this);
+        const q = this.executionQueue
+            .then(async () => {
+                try {
+                    const fexists = async (name) => {
+                        return await plugin.functionExists(name);
+                    };
+                    let out: Extism.PluginOutput;
+                    if (jobId && (await fexists(method + "ForJob"))) {
+                        out = await plugin.call(
+                            method + "ForJob",
+                            JSON.stringify({
+                                jobId: jobId,
+                                args: inputData,
+                            })
+                        );
+                    } else if (await fexists(method)) {
+                        out = await plugin.call(method, inputData);
                     } else {
-                        return "";
+                        if (required) {
+                            throw new Error("No method " + method + " found in  plugin " + this);
+                        } else {
+                            return "";
+                        }
                     }
+                    return out ? out.text() : undefined;
+                } catch (e) {
+                    console.error("Error calling plugin in execution queue", e);
+                    throw e;
                 }
-                return out?out.text():undefined;
-            }catch(e){
-                console.error("Error calling plugin in execution queue",e);
+            })
+            .catch((e) => {
+                console.error("Error in execution queue", e);
                 throw e;
-            }
-        }).catch((e)=>{
-            console.error("Error in execution queue",e);
-            throw e;
-        });
-        
-     
-        this.executionQueue= q;
+            });
+
+        this.executionQueue = q;
         return await q;
     }
 
@@ -147,26 +154,26 @@ export default class ExtismJob {
 
     async run(inputData: string): Promise<string | undefined> {
         if (!this.initialized) throw new Error("Not initialized");
-        try{
+        try {
             return await this._callPlugin(this.main.plugin, "run", this.jobId, inputData);
-        }catch(e){
-            console.error("Error running plugin",e);
+        } catch (e) {
+            console.error("Error running plugin", e);
             throw e;
         }
     }
 
     // async loop() {
-        // if (!this.initialized) throw new Error("Not initialized");
-          
-        // if (this.looping) return;
-        // this.looping = true;
-        // await this._callPluginMaybe(this.main.plugin, "loop", this.jobId, "{}")
-        //     .finally(() => {
-        //         this.looping = false;
-        //     })
-        //     .catch((e) => {
-        //         console.error(e);
-        //     });
+    // if (!this.initialized) throw new Error("Not initialized");
+
+    // if (this.looping) return;
+    // this.looping = true;
+    // await this._callPluginMaybe(this.main.plugin, "loop", this.jobId, "{}")
+    //     .finally(() => {
+    //         this.looping = false;
+    //     })
+    //     .catch((e) => {
+    //         console.error(e);
+    //     });
     // }
 
     private destructing: boolean = false;

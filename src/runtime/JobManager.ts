@@ -52,6 +52,7 @@ export default class JobManager {
                     filterByRunOn: "openagents/extism-runtime",
                     wait: 60000,
                     excludeId: this.failedJobs.map((j) => j.jobId),
+                    filterByBids: [],
                 })
             ).response;
 
@@ -72,6 +73,17 @@ export default class JobManager {
                     const expiration = Math.min(Date.now() + maxExecutionTime, job.expiration);
                     const pluginMainSHAHash = Crypto.createHash("sha256").update(pluginMain).digest("hex");
 
+                    let allowedHosts = undefined;
+                    for(const p of job.param){
+                        if (p.key == "allow-host") {
+                            if (!allowedHosts) allowedHosts = [];
+                            allowedHosts.push(...p.value);
+                        } else if (p.key == "allow-hosts") {
+                            if (!allowedHosts) allowedHosts = [];
+                            allowedHosts.push(...p.value);
+                        }
+                    }
+                    
                     if(this.secrets){
                         const secrets0 = this.secrets.namespace(pluginMainSHAHash);
                         const secrets1 = this.secrets.namespace(pluginMain);               
@@ -101,7 +113,7 @@ export default class JobManager {
                         }
                     }
                     console.log("Running plugin", pluginMain);
-                    const plugin = new ExtismJob(job.id, pluginMain, expiration, mergedHostFunctions);
+                    const plugin = new ExtismJob(job.id, pluginMain, expiration, mergedHostFunctions, allowedHosts);
                     const res = (await this.conn.acceptJob({ jobId: job.id })).response;
                     console.log("Accepted job", res);
                     // console.log("Initializing plugin", pluginMain, pluginMainSHAHash,inputData);

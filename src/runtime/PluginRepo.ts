@@ -73,10 +73,22 @@ export default  class PluginRepo{
                     const miniTemplate = plugin["mini-template"];
                     const main = miniTemplate.main;
                     const input=miniTemplate.input;
+                    const allowedHosts = miniTemplate["allowed-hosts"];
+                    
+                    
                     if(!main || !input) throw new Error("Invalid mini-template");
                     const escapeString = (str)=>{
                         return str.replace(/"/g,`\\"`);
                     };
+
+                    let allowedHostsTemplate="";
+                    if(allowedHosts){
+                        for(const host of allowedHosts){
+                            allowedHostsTemplate+=`["param", "allow-host", "${escapeString(host)}"],\n`;
+                        }
+                    }
+                    
+                    
                     template = `
                         {
                             "kind": {{{meta.kind}}},
@@ -84,6 +96,7 @@ export default  class PluginRepo{
                             "tags": [
                                 ["param","run-on", "openagents/extism-runtime" ],
                                 ["param","main","${escapeString(main)}"],
+                                ${allowedHostsTemplate.trim()}
                                 ["i", "${escapeString(input)}", "text", ""],
                                 ["expiration", "{{{sys.expiration_timestamp_seconds}}}"]
                             ],
@@ -91,6 +104,7 @@ export default  class PluginRepo{
                         }                    
                     `;                
                 }
+
                 if(!template) throw new Error("Invalid plugin template");
                 if(!sockets) throw new Error("Invalid plugin sockets");
                 if(!meta) throw new Error("Invalid plugin meta");
