@@ -52,7 +52,13 @@ export default class JobManager {
                     filterByRunOn: "openagents/extism-runtime",
                     wait: 60000,
                     excludeId: this.failedJobs.map((j) => j.jobId),
-                    filterByBids: [],
+                    filterByBids: [
+                        {
+                            amount: 0,
+                            currency: "bitcoin",
+                            protocol: "lightning",
+                        }
+                    ],
                 })
             ).response;
 
