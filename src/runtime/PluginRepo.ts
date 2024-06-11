@@ -21,8 +21,13 @@ export default  class PluginRepo{
                     plugins=[];
                     for(const pluginRelPath of index){
                         try{
-                            const baseUrl = this.indexPath.split("/").slice(0,-1).join("/");
-                            const pluginAbsPath = baseUrl + "/" + pluginRelPath;
+                            let pluginAbsPath;
+                            if(pluginRelPath.startsWith("http://") || pluginRelPath.startsWith("https://")){
+                                pluginAbsPath = pluginRelPath;
+                            }else{
+                                const baseUrl = this.indexPath.split("/").slice(0,-1).join("/");
+                                pluginAbsPath = baseUrl + "/" + pluginRelPath;
+                            }
                             const plugin = JSON5.parse(await fetch(pluginAbsPath).then(res=>res.text()));
                             plugins.push(plugin);
                         }catch(e){
