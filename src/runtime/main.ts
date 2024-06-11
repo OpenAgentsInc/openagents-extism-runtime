@@ -13,9 +13,9 @@ import SecretHostFunctions from "./binds/SecretsHostFunctions";
 import BlobHostFunctions from "./binds/BlobHostFunctions";
 import PluginRepo from "./PluginRepo";
 async function main(){
-    const IP = process.env.POOL_ADDRESS || "127.0.0.1";
-    const PORT = Number(process.env.POOL_PORT || 5000);
-    const POOL_SSL = (process.env.POOL_SSL || "false") == "true";
+    const IP = process.env.POOL_ADDRESS || "playground.openagents.com";
+    const PORT = Number(process.env.POOL_PORT || 6021);
+    const POOL_SSL = (process.env.POOL_SSL || "true") == "true";
 
     const CA_CRT_PATH: string = process.env.POOL_CA_CRT || "";
     const CLIENT_CRT_PATH: string = process.env.POOL_CLIENT_CRT || "";
@@ -29,7 +29,7 @@ async function main(){
 
     const SECRETS_PROVIDERS: string[] = process.env.EXTISM_RUNTIME_SECRETS_PROVIDERS
         ? process.env.EXTISM_RUNTIME_SECRETS_PROVIDERS.split(",")
-        : ["https://raw.githubusercontent.com/OpenAgentsInc/openagents-plugins/master/secrets.json"];
+        : ["https://staging.openagents.com/api/v1/plugins"];
 
     const SECRETS_KEY: string = process.env.EXTISM_RUNTIME_SECRETS_KEY || "./private.pem";
     
