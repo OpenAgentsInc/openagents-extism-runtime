@@ -7,7 +7,7 @@
     "build": "npx tsc -p ./tsconfig.json && npx tsc-alias -p tsconfig.json",
     "start": "node build/js/runtime/main.js",
     "test": "echo \"Error: no test specified\" && exit 0",
-    "debug": "ts-node  --experimental-specifier-resolution=node --transpile-only --esm  src/runtime/main.ts"
+    "debug": "tsx  src/runtime/main.ts"
   },
   "author": "",
   "license": "",
@@ -35,7 +35,7 @@
     "esbuild": "^0.20.2",
     "ts-node": "^10.9.2",
     "tsc-alias": "^1.8.8",
-    "tsx": "^4.9.3",
+    "tsx": "^4.15.2",
     "typescript": "^5.4.3"
   }
 }
