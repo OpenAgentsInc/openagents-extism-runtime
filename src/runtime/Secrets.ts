@@ -49,23 +49,31 @@ export class SecretNamespace {
 
 export class HttpSecretProvider extends SecretProvider {
     url: string;
-    lastFetch: number = 0;
     refreshInterval: number;
-    document: {[key:string]:string} = {};
+    cache: {[namespace:string]:{
+        lastFetch: number;
+        document: {[key:string]:string};
+    }} = {};
     constructor(url: string,refreshInterval:number = 1000*60){
         super();
         this.url = url;
         this.refreshInterval = refreshInterval;
     }
-    async getRemote(){
-        if(Date.now() - this.lastFetch > this.refreshInterval){
-            this.document=await fetch(this.url).then(res=>res.json());
-            this.lastFetch = Date.now();
+    async getRemote(namespace:string){
+        let lastFetch = this.cache[namespace]?.lastFetch || 0;
+        if(Date.now() - lastFetch > this.refreshInterval){
+            const fullUrl = new URL(this.url);
+            fullUrl.searchParams.set("namespace",namespace);
+            const document = await fetch(fullUrl.toString()).then(res=>res.json());
+            this.cache[namespace] = {
+                lastFetch: Date.now(),
+                document
+            };
         }
-        return this.document;
+        return this.cache[namespace].document;
     }
     async get(namespace:string, name: string): Promise<string> {
-        const n = (await this.getRemote())[namespace];
+        const n = (await this.getRemote(namespace))[namespace];
         if(n) return this.decrypt(n[name]);
         return undefined;
     }

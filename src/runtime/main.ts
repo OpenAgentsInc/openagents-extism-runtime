@@ -29,13 +29,13 @@ async function main(){
 
     const SECRETS_PROVIDERS: string[] = process.env.EXTISM_RUNTIME_SECRETS_PROVIDERS
         ? process.env.EXTISM_RUNTIME_SECRETS_PROVIDERS.split(",")
-        : ["https://raw.githubusercontent.com/OpenAgentsInc/openagents-plugins/master/secrets.json"];
+        : [];
 
-    const SECRETS_KEY: string = process.env.EXTISM_RUNTIME_SECRETS_KEY || "./private.pem";
+    const SECRETS_KEY: string = process.env.EXTISM_RUNTIME_SECRETS_KEY || "";
     
     const PLUGINS_REPO =
         process.env.PLUGINS_REPO ||
-        "https://raw.githubusercontent.com/OpenAgentsInc/openagents-plugins/master/index.json5";
+        "https://openagents.com/api/v1/plugins"+(SECRETS_PROVIDERS.length==0?"?secrets=false":"")
 
     const ICON_URL = process.env.ICON_URL || "";
     const NAME = process.env.NAME || "Extism Plugin Runner Node";
