@@ -29,7 +29,7 @@ async function main(){
 
     const SECRETS_PROVIDERS: string[] = process.env.EXTISM_RUNTIME_SECRETS_PROVIDERS
         ? process.env.EXTISM_RUNTIME_SECRETS_PROVIDERS.split(",")
-        : ["https://staging.openagents.com/api/v1/plugins"];
+        : ["https://raw.githubusercontent.com/OpenAgentsInc/openagents-plugins/master/secrets.json"];
 
     const SECRETS_KEY: string = process.env.EXTISM_RUNTIME_SECRETS_KEY || "./private.pem";
     
