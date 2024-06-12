@@ -78,7 +78,7 @@ export default  class PluginRepo{
                     const miniTemplate = plugin["mini-template"];
                     const main = miniTemplate.main;
                     const input=miniTemplate.input;
-                    const allowedHosts = miniTemplate["allowed-hosts"];
+                    const allowedHosts = miniTemplate["allowed-hosts"]||miniTemplate["allowed_hosts"];
                     
                     
                     if(!main || !input) throw new Error("Invalid mini-template");
