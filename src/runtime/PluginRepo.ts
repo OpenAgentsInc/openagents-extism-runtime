@@ -92,6 +92,13 @@ export default  class PluginRepo{
                             allowedHostsTemplate+=`["param", "allow-host", "${escapeString(host)}"],\n`;
                         }
                     }
+
+                    let bidsTemplate="";
+                    if(meta["prices"]){
+                        for(const price of meta["prices"]){
+                            bidsTemplate+=`["bid", "${price["amount"]}", "${price["currency"]||"bitcoin"}", "${price["protocol"]||"lightning"}"],\n`;
+                        }
+                    }
                     
                     
                     template = `
@@ -102,6 +109,7 @@ export default  class PluginRepo{
                                 ["param","run-on", "openagents/extism-runtime" ],
                                 ["param","main","${escapeString(main)}"],
                                 ${allowedHostsTemplate.trim()}
+                                ${bidsTemplate.trim()}
                                 ["i", "${escapeString(input)}", "text", ""],
                                 ["expiration", "{{{sys.expiration_timestamp_seconds}}}"]
                             ],
